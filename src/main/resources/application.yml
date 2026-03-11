@@ -1,0 +1,38 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/timeless}
+    username: ${DB_USER:timeless}
+    password: ${DB_PASS:timeless}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    enabled: true
+  thymeleaf:
+    cache: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:timeless-marketplace-secret-key-must-be-at-least-32-chars-long}
+    expiration-ms: ${JWT_EXPIRY:86400000}
+  bootstrap:
+    enabled: ${BOOTSTRAP_ENABLED:true}
+  admin:
+    email: ${APP_ADMIN_EMAIL:admin@timeless.com}
+    password: ${APP_ADMIN_PASSWORD:Admin123!}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
