@@ -1,0 +1,514 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1-create-users
+      author: openai
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_users
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_users_email
+              - column:
+                  name: password_hash
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: full_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone
+                  type: VARCHAR(50)
+              - column:
+                  name: address
+                  type: TEXT
+              - column:
+                  name: role
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: enabled
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email_verified
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: users
+            indexName: idx_users_role
+            columns:
+              - column:
+                  name: role
+
+  - changeSet:
+      id: 2-create-watches
+      author: openai
+      changes:
+        - createTable:
+            tableName: watches
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_watches
+                    nullable: false
+              - column:
+                  name: seller_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: brand
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: category
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: condition
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: price
+                  type: DECIMAL(12,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: stock_quantity
+                  type: INT
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  defaultValue: PENDING_REVIEW
+                  constraints:
+                    nullable: false
+              - column:
+                  name: image_url
+                  type: VARCHAR(500)
+              - column:
+                  name: reference_number
+                  type: VARCHAR(255)
+              - column:
+                  name: year
+                  type: INT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: watches
+            baseColumnNames: seller_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_watches_seller
+            onDelete: CASCADE
+        - createIndex:
+            tableName: watches
+            indexName: idx_watches_status
+            columns:
+              - column:
+                  name: status
+        - createIndex:
+            tableName: watches
+            indexName: idx_watches_brand
+            columns:
+              - column:
+                  name: brand
+        - createIndex:
+            tableName: watches
+            indexName: idx_watches_seller_id
+            columns:
+              - column:
+                  name: seller_id
+
+  - changeSet:
+      id: 3-create-orders
+      author: openai
+      changes:
+        - createTable:
+            tableName: orders
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_orders
+                    nullable: false
+              - column:
+                  name: buyer_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: watch_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_amount
+                  type: DECIMAL(12,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tracking_number
+                  type: VARCHAR(255)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: orders
+            baseColumnNames: buyer_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_orders_buyer
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: orders
+            baseColumnNames: watch_id
+            referencedTableName: watches
+            referencedColumnNames: id
+            constraintName: fk_orders_watch
+            onDelete: CASCADE
+        - createIndex:
+            tableName: orders
+            indexName: idx_orders_buyer_id
+            columns:
+              - column:
+                  name: buyer_id
+        - createIndex:
+            tableName: orders
+            indexName: idx_orders_watch_id
+            columns:
+              - column:
+                  name: watch_id
+        - createIndex:
+            tableName: orders
+            indexName: idx_orders_status
+            columns:
+              - column:
+                  name: status
+
+  - changeSet:
+      id: 4-create-payments
+      author: openai
+      changes:
+        - createTable:
+            tableName: payments
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_payments
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_payments_order_id
+              - column:
+                  name: buyer_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount
+                  type: DECIMAL(12,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: method
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: transaction_ref
+                  type: VARCHAR(255)
+              - column:
+                  name: paid_at
+                  type: TIMESTAMP
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: payments
+            baseColumnNames: order_id
+            referencedTableName: orders
+            referencedColumnNames: id
+            constraintName: fk_payments_order
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: payments
+            baseColumnNames: buyer_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_payments_buyer
+            onDelete: CASCADE
+        - createIndex:
+            tableName: payments
+            indexName: idx_payments_buyer_id
+            columns:
+              - column:
+                  name: buyer_id
+
+  - changeSet:
+      id: 5-create-user-watch-wishlist
+      author: openai
+      changes:
+        - createTable:
+            tableName: user_watch_wishlist
+            columns:
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_user_watch_wishlist
+              - column:
+                  name: watch_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_user_watch_wishlist
+              - column:
+                  name: added_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: user_watch_wishlist
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_user_watch_wishlist_user
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: user_watch_wishlist
+            baseColumnNames: watch_id
+            referencedTableName: watches
+            referencedColumnNames: id
+            constraintName: fk_user_watch_wishlist_watch
+            onDelete: CASCADE
+        - createIndex:
+            tableName: user_watch_wishlist
+            indexName: idx_user_watch_wishlist_watch_id
+            columns:
+              - column:
+                  name: watch_id
+
+  - changeSet:
+      id: 6-create-user-watch-cart
+      author: openai
+      changes:
+        - createTable:
+            tableName: user_watch_cart
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_user_watch_cart
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: watch_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: quantity
+                  type: INT
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: added_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: user_watch_cart
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_user_watch_cart_user
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: user_watch_cart
+            baseColumnNames: watch_id
+            referencedTableName: watches
+            referencedColumnNames: id
+            constraintName: fk_user_watch_cart_watch
+            onDelete: CASCADE
+        - addUniqueConstraint:
+            tableName: user_watch_cart
+            columnNames: user_id, watch_id
+            constraintName: uk_user_watch_cart_user_watch
+        - createIndex:
+            tableName: user_watch_cart
+            indexName: idx_user_watch_cart_user_id
+            columns:
+              - column:
+                  name: user_id
+
+  - changeSet:
+      id: 7-create-reviews
+      author: openai
+      changes:
+        - createTable:
+            tableName: reviews
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_reviews
+                    nullable: false
+              - column:
+                  name: buyer_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: watch_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rating
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: comment
+                  type: TEXT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: reviews
+            baseColumnNames: buyer_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_reviews_buyer
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: reviews
+            baseColumnNames: watch_id
+            referencedTableName: watches
+            referencedColumnNames: id
+            constraintName: fk_reviews_watch
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: reviews
+            baseColumnNames: order_id
+            referencedTableName: orders
+            referencedColumnNames: id
+            constraintName: fk_reviews_order
+            onDelete: CASCADE
+        - addUniqueConstraint:
+            tableName: reviews
+            columnNames: buyer_id, watch_id
+            constraintName: uk_reviews_buyer_watch
+        - addUniqueConstraint:
+            tableName: reviews
+            columnNames: order_id
+            constraintName: uk_reviews_order_id
+        - createIndex:
+            tableName: reviews
+            indexName: idx_reviews_watch_id
+            columns:
+              - column:
+                  name: watch_id
