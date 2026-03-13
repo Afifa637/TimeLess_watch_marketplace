@@ -1,5 +1,9 @@
 target/
+
+# IntelliJ IDEA
 .idea/
+*.iml
+*.iws
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -16,3 +20,8 @@ buildNumber.properties
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+# Java
+*.class
+
+# Environment
+.env
