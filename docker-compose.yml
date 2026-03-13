@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: timeless
+      POSTGRES_USER: timeless
+      POSTGRES_PASSWORD: timeless
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U timeless"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/timeless
+      DB_USER: timeless
+      DB_PASS: timeless
+      JWT_SECRET: timeless-marketplace-secret-key-must-be-at-least-32-chars-long
+      APP_ADMIN_EMAIL: admin@timeless.com
+      APP_ADMIN_PASSWORD: Admin123!
+      BOOTSTRAP_ENABLED: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
