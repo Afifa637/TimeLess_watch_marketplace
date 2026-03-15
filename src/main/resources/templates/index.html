@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout/base :: head('Timeless | Luxury Watch Marketplace')}"></head>
+<body>
+<div th:replace="~{layout/base :: navbar}"></div>
+
+<main class="container py-5 main-content">
+    <section class="hero-section mb-5">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <span class="badge bg-light text-dark mb-3">Luxury Watch Resale Marketplace</span>
+                <h1 class="display-4 fw-bold mb-3">Timeless</h1>
+                <p class="lead mb-4">Discover authenticated luxury watches, sell with confidence, and manage every part of your marketplace journey in one refined experience.</p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a class="btn btn-timeless-primary btn-lg" th:href="@{/watches}">Browse Watches</a>
+                    <a class="btn btn-light btn-lg" th:href="@{/register}">Sell a Watch</a>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="timeless-panel p-4 bg-white text-dark">
+                    <h5 class="fw-bold mb-3">Why collectors choose Timeless</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0">Curated seller onboarding and admin review workflow</li>
+                        <li class="list-group-item px-0">Fast prototype checkout with complete order tracking</li>
+                        <li class="list-group-item px-0">Elegant dashboards for buyers, sellers, and admins</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="stat-card h-100">
+                    <h5 class="fw-bold">Authenticated Sellers</h5>
+                    <p class="text-muted mb-0">Seller listings are routed through admin review before going live to buyers.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card h-100">
+                    <h5 class="fw-bold">Secure Payments</h5>
+                    <p class="text-muted mb-0">Prototype payment flow simulates confirmation and keeps a clean payment history per order.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card h-100">
+                    <h5 class="fw-bold">Quality Guaranteed</h5>
+                    <p class="text-muted mb-0">Reviews, condition labels, and detailed watch metadata help buyers shop with confidence.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="fw-bold mb-1">Featured Watches</h2>
+                <p class="text-muted mb-0">Fresh highlights from active marketplace listings.</p>
+            </div>
+            <a class="btn btn-timeless-outline" th:href="@{/watches}">See All Watches</a>
+        </div>
+        <div class="watch-grid">
+            <a class="watch-card text-decoration-none text-dark" th:each="watch : ${featuredWatches}" th:href="@{'/watches/' + ${watch.id}}">
+                <img class="watch-card-image" th:src="${watch.imageUrl != null ? watch.imageUrl : 'https://via.placeholder.com/800x600?text=Timeless'}" alt="Watch image">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                        <div>
+                            <h5 class="fw-bold mb-1" th:text="${watch.name}">Watch Name</h5>
+                            <p class="text-muted mb-0" th:text="${watch.brand + ' • ' + watch.category}">Brand • Category</p>
+                        </div>
+                        <span class="badge-condition" th:text="${watch.condition}">LIKE_NEW</span>
+                    </div>
+                    <div class="rating-display mb-3">
+                        <div class="star-rating">
+                            <span th:each="i : ${#numbers.sequence(1,5)}" th:text="'★'" th:classappend="${i <= T(java.lang.Math).round(watch.averageRating)} ? ' filled' : ''">★</span>
+                        </div>
+                        <small class="text-muted" th:text="${watch.averageRating}">4.8</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong class="price-text" th:text="${'৳' + #numbers.formatDecimal(watch.price, 1, 'COMMA', 2, 'POINT')}">$9,999.00</strong>
+                        <span class="text-muted" th:text="${watch.sellerName}">Seller</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{layout/base :: footerScripts}"></div>
+</body>
+</html>

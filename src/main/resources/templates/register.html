@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Register | Timeless')}"></head>
+<body>
+<div th:replace="~{layout/base :: navbar}"></div>
+
+<main class="container py-5 main-content">
+    <div class="auth-card timeless-panel p-4 p-md-5">
+        <div class="text-center mb-4">
+            <h1 class="fw-bold">Create Your Timeless Account</h1>
+            <p class="text-muted mb-0">Join as a buyer or seller in under a minute.</p>
+        </div>
+        <form id="registerForm" class="needs-validation" novalidate>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="fullName" class="form-label">Full Name</label>
+                    <input id="fullName" name="fullName" type="text" class="form-control" required>
+                </div>
+                <div class="col-12">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input id="email" name="email" type="email" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="password" class="form-label">Password</label>
+                    <input id="password" name="password" type="password" class="form-control" required minlength="6">
+                </div>
+                <div class="col-md-6">
+                    <label for="role" class="form-label">Join As</label>
+                    <select id="role" name="role" class="form-select" required>
+                        <option value="BUYER">Buyer</option>
+                        <option value="SELLER">Seller</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input id="phone" name="phone" type="text" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label for="address" class="form-label">Address</label>
+                    <input id="address" name="address" type="text" class="form-control">
+                </div>
+            </div>
+            <button class="btn btn-timeless-primary w-100 mt-4" type="submit">Register</button>
+        </form>
+        <p class="text-center text-muted mt-4 mb-0">Already registered? <a th:href="@{/login}">Login here</a></p>
+    </div>
+</main>
+
+<div th:replace="~{layout/base :: footerScripts}"></div>
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const form = event.target;
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return;
+        }
+        const payload = {
+            fullName: form.fullName.value,
+            email: form.email.value,
+            password: form.password.value,
+            role: form.role.value,
+            phone: form.phone.value,
+            address: form.address.value
+        };
+        try {
+            await registerUser(payload);
+        } catch (error) {
+            showToast(error.message, 'error');
+        }
+    });
+</script>
+</body>
+</html>
