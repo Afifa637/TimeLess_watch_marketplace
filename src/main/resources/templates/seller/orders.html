@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Seller Orders | Timeless')}"></head>
+<body>
+<div th:replace="~{layout/base :: navbar}"></div>
+
+<main class="container py-5 main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h1 class="fw-bold mb-1">Seller Orders</h1>
+            <p class="text-muted mb-0">Advance paid orders through your fulfillment workflow.</p>
+        </div>
+    </div>
+
+    <div th:if="${orders.isEmpty()}" class="empty-state">
+        <h4 class="fw-bold">No seller orders yet</h4>
+        <p class="text-muted">Orders for your listings will appear here.</p>
+    </div>
+
+    <div th:if="${!orders.isEmpty()}" class="timeless-panel p-3 p-lg-4">
+        <div class="table-responsive">
+            <table class="table-timeless">
+                <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Buyer</th>
+                    <th>Watch</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${orders}">
+                    <td th:text="${order.id}">1</td>
+                    <td th:text="${order.buyerName}">Buyer</td>
+                    <td th:text="${order.watchName}">Watch</td>
+                    <td>
+                        <span class="badge-status"
+                              th:classappend="${' ' + order.status}"
+                              th:text="${order.status}">CONFIRMED</span>
+                    </td>
+                    <td th:text="${'৳' + #numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                    <td th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy')}">01 Jan 2025</td>
+                    <td>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-sm btn-timeless-primary"
+                                    th:if="${order.status == 'CONFIRMED'}"
+                                    th:onclick="|updateOrderStatus(${order.id}, 'PROCESSING')|">
+                                Mark as Processing
+                            </button>
+
+                            <button class="btn btn-sm btn-timeless-outline"
+                                    th:if="${order.status == 'PROCESSING'}"
+                                    th:onclick="|const tracking = prompt('Enter tracking number'); if (tracking) { updateOrderStatus(${order.id}, 'SHIPPED', tracking); }|">
+                                Mark as Shipped
+                            </button>
+
+                            <span class="text-muted small"
+                                  th:if="${order.status != 'CONFIRMED' and order.status != 'PROCESSING'}">
+                                No action available
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{layout/base :: footerScripts}"></div>
+</body>
+</html>
