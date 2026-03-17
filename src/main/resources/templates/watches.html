@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Browse Watches | Timeless')}"></head>
+<body>
+<div th:replace="~{layout/base :: navbar}"></div>
+
+<main class="container py-5 main-content">
+    <div class="row g-4">
+        <div class="col-lg-3">
+            <form method="get" th:action="@{/watches}" class="filter-sidebar">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold mb-0">Filters</h4>
+                    <a class="small text-decoration-none" th:href="@{/watches}">Clear Filters</a>
+                </div>
+
+                <div class="filter-group">
+                    <label class="form-label">Search</label>
+                    <input type="text" class="form-control" name="search" placeholder="Search by brand or name" th:value="${search}">
+                </div>
+
+                <div class="filter-group">
+                    <label class="form-label">Brand</label>
+                    <div class="form-check" th:each="brand : ${brandOptions}">
+                        <input class="form-check-input" type="checkbox" name="brands" th:value="${brand}" th:id="${'brand-' + brand}" th:checked="${selectedBrands.contains(brand)}">
+                        <label class="form-check-label" th:for="${'brand-' + brand}" th:text="${brand}">Rolex</label>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="form-label">Category</label>
+                    <div class="form-check" th:each="category : ${categoryOptions}">
+                        <input class="form-check-input" type="checkbox" name="categories" th:value="${category}" th:id="${'category-' + category}" th:checked="${selectedCategories.contains(category)}">
+                        <label class="form-check-label" th:for="${'category-' + category}" th:text="${category}">Dress</label>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="form-label">Condition</label>
+                    <div class="form-check" th:each="condition : ${conditionOptions}">
+                        <input class="form-check-input" type="checkbox" name="conditions" th:value="${condition}" th:id="${'condition-' + condition}" th:checked="${selectedConditions.contains(condition)}">
+                        <label class="form-check-label" th:for="${'condition-' + condition}" th:text="${condition}">LIKE_NEW</label>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="form-label">Price Range</label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="number"
+                                   step="100"
+                                   min="0"
+                                   class="form-control"
+                                   name="minPrice"
+                                   placeholder="Min"
+                                   th:min="${priceFloor != null ? priceFloor : 0}"
+                                   th:max="${priceCeiling != null ? priceCeiling : 10000000}"
+                                   th:value="${minPrice != null ? minPrice : (priceFloor != null ? priceFloor : 0)}">
+                        </div>
+                        <div class="col-6">
+                            <input type="number"
+                                   step="100"
+                                   min="0"
+                                   class="form-control"
+                                   name="maxPrice"
+                                   placeholder="Max"
+                                   th:min="${priceFloor != null ? priceFloor : 0}"
+                                   th:max="${priceCeiling != null ? priceCeiling : 10000000}"
+                                   th:value="${maxPrice != null ? maxPrice : (priceCeiling != null ? priceCeiling : 10000000)}">
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2"
+                           th:text="${'Available range: ৳' + #numbers.formatDecimal(priceFloor, 1, 'COMMA', 2, 'POINT') + ' - ৳' + #numbers.formatDecimal(priceCeiling, 1, 'COMMA', 2, 'POINT')}">
+                        Available range
+                    </small>
+                </div>
+
+                <div class="filter-group">
+                    <label class="form-label">Sort By</label>
+                    <select class="form-select" name="sort">
+                        <option value="newest" th:selected="${sort == 'newest'}">Newest</option>
+                        <option value="price-asc" th:selected="${sort == 'price-asc'}">Price: Low to High</option>
+                        <option value="price-desc" th:selected="${sort == 'price-desc'}">Price: High to Low</option>
+                        <option value="rating" th:selected="${sort == 'rating'}">Rating</option>
+                    </select>
+                </div>
+
+                <input type="hidden" name="size" th:value="${watchPage.size}">
+                <button class="btn btn-timeless-primary w-100" type="submit">Apply Filters</button>
+            </form>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <h1 class="fw-bold mb-1">Browse Watches</h1>
+                    <p class="text-muted mb-0" th:text="${watchPage.totalElements + ' active listings available'}">0 active listings available</p>
+                </div>
+            </div>
+
+            <div th:if="${watchPage.totalElements == 0}" class="empty-state">
+                <h4 class="fw-bold">No watches found</h4>
+                <p class="text-muted">Try adjusting your filters to broaden the search.</p>
+                <a class="btn btn-timeless-primary" th:href="@{/watches}">Reset Filters</a>
+            </div>
+
+            <div th:if="${watchPage.totalElements > 0}" class="watch-grid mb-4">
+                <a class="watch-card text-decoration-none text-dark" th:each="watch : ${watchPage.content}" th:href="@{'/watches/' + ${watch.id}}">
+                    <img class="watch-card-image" th:src="${watch.imageUrl != null ? watch.imageUrl : 'https://via.placeholder.com/800x600?text=Timeless'}" alt="Watch image">
+                    <div class="p-4">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <div>
+                                <h5 class="fw-bold mb-1" th:text="${watch.name}">Watch</h5>
+                                <p class="text-muted mb-0" th:text="${watch.brand}">Rolex</p>
+                            </div>
+                            <span class="badge-condition" th:text="${watch.condition}">GOOD</span>
+                        </div>
+                        <p class="mb-2 text-muted" th:text="${watch.category + ' • Sold by ' + watch.sellerName}">Category • Seller</p>
+                        <div class="rating-display mb-3">
+                            <div class="star-rating">
+                                <span th:each="i : ${#numbers.sequence(1,5)}" th:text="'★'" th:classappend="${i <= T(java.lang.Math).round(watch.averageRating)} ? ' filled' : ''">★</span>
+                            </div>
+                            <small class="text-muted" th:text="${watch.averageRating + ' / 5'}">4.6 / 5</small>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong class="price-text" th:text="${'৳' + #numbers.formatDecimal(watch.price, 1, 'COMMA', 2, 'POINT')}">$1,000.00</strong>
+                            <span class="badge-status" th:classappend="${' ' + watch.status}" th:text="${watch.status}">ACTIVE</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <nav th:if="${watchPage.totalPages > 1}" aria-label="Watch pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${watchPage.first} ? ' disabled' : ''">
+                        <a class="page-link" th:href="${filterQueryString != '' ? '/watches?page=' + (watchPage.number - 1) + '&' + filterQueryString : '/watches?page=' + (watchPage.number - 1)}">Previous</a>
+                    </li>
+                    <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, watchPage.totalPages - 1)}" th:classappend="${pageNumber == watchPage.number} ? ' active' : ''">
+                        <a class="page-link" th:text="${pageNumber + 1}" th:href="${filterQueryString != '' ? '/watches?page=' + pageNumber + '&' + filterQueryString : '/watches?page=' + pageNumber}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${watchPage.last} ? ' disabled' : ''">
+                        <a class="page-link" th:href="${filterQueryString != '' ? '/watches?page=' + (watchPage.number + 1) + '&' + filterQueryString : '/watches?page=' + (watchPage.number + 1)}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{layout/base :: footerScripts}"></div>
+</body>
+</html>

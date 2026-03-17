@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Watch Details | Timeless')}"></head>
+<body>
+<div th:replace="~{layout/base :: navbar}"></div>
+
+<main class="container py-5 main-content">
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-6">
+            <img class="watch-detail-image" th:src="${watch.imageUrl != null ? watch.imageUrl : 'https://via.placeholder.com/1000x800?text=Timeless'}" alt="Watch image">
+        </div>
+        <div class="col-lg-6">
+            <div class="timeless-panel p-4 p-lg-5">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                    <div>
+                        <p class="text-muted mb-1" th:text="${watch.brand + ' • ' + watch.category}">Brand • Category</p>
+                        <h1 class="fw-bold mb-2" th:text="${watch.name}">Watch Name</h1>
+                        <div class="rating-display">
+                            <div class="star-rating">
+                                <span th:each="i : ${#numbers.sequence(1,5)}" th:text="'★'" th:classappend="${i <= T(java.lang.Math).round(watch.averageRating)} ? ' filled' : ''">★</span>
+                            </div>
+                            <span class="text-muted" th:text="${watch.averageRating + ' average • ' + watch.reviewCount + ' reviews'}">4.8 average • 12 reviews</span>
+                        </div>
+                    </div>
+                    <span class="badge-condition" th:text="${watch.condition}">LIKE_NEW</span>
+                </div>
+
+                <div class="price-text mb-4" th:text="${'৳' + #numbers.formatDecimal(watch.price, 1, 'COMMA', 2, 'POINT')}">$14,500.00</div>
+
+                <div class="row row-cols-2 g-3 mb-4">
+                    <div>
+                        <small class="text-muted d-block">Seller</small>
+                        <strong th:text="${watch.sellerName}">Seller Name</strong>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Reference</small>
+                        <strong th:text="${watch.referenceNumber != null ? watch.referenceNumber : 'N/A'}">Ref</strong>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Year</small>
+                        <strong th:text="${watch.year != null ? watch.year : 'N/A'}">2024</strong>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Status</small>
+                        <span class="badge-status" th:classappend="${' ' + watch.status}" th:text="${watch.status}">ACTIVE</span>
+                    </div>
+                </div>
+
+                <p class="text-muted mb-4" th:text="${watch.description != null ? watch.description : 'No description provided.'}">Description</p>
+
+                <div class="d-flex flex-wrap gap-2 mb-4" th:if="${currentRole == 'BUYER'}">
+                    <button class="btn btn-timeless-primary" th:onclick="|addToCart(${watch.id})|">Add to Cart</button>
+                    <button class="btn btn-timeless-outline" th:onclick="|addToWishlist(${watch.id})|">Add to Wishlist</button>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mb-4" th:if="${!isAuthenticated or currentRole != 'BUYER'}">
+                    <a class="btn btn-timeless-primary" th:href="@{/login}" th:if="${!isAuthenticated}">Login to Purchase</a>
+                    <a class="btn btn-timeless-outline" th:href="@{/seller/watches/{id}/edit(id=${watch.id})}" th:if="${currentRole == 'SELLER' and currentUser != null and currentUser.id == watch.sellerId}">Edit Watch</a>
+                    <div class="d-flex flex-wrap gap-2" th:if="${currentRole == 'ADMIN'}">
+                        <button class="btn btn-timeless-primary" th:onclick="|approveWatch(${watch.id})|">Approve</button>
+                        <button class="btn btn-timeless-danger" th:onclick="|rejectWatch(${watch.id})|">Reject</button>
+                        <button class="btn btn-timeless-outline" th:onclick="|deactivateWatch(${watch.id})|">Deactivate</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="row g-4 mt-1">
+        <div class="col-lg-8">
+            <div class="timeless-panel p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="fw-bold mb-0">Reviews</h3>
+                    <span class="text-muted" th:text="${reviews.size()} + ' total'">0 total</span>
+                </div>
+                <div th:if="${reviews.isEmpty()}" class="empty-state py-4">
+                    <p class="mb-0 text-muted">No reviews yet for this watch.</p>
+                </div>
+                <div th:if="${!reviews.isEmpty()}" class="d-flex flex-column gap-3">
+                    <div class="timeless-panel p-3" th:each="review : ${reviews}">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                            <div>
+                                <strong th:text="${review.buyerName}">Buyer</strong>
+                                <div class="star-rating mt-1">
+                                    <span th:each="i : ${#numbers.sequence(1,5)}" th:text="'★'" th:classappend="${i <= review.rating} ? ' filled' : ''">★</span>
+                                </div>
+                            </div>
+                            <small class="text-muted" th:text="${#temporals.format(review.createdAt, 'dd MMM yyyy')}">01 Jan 2025</small>
+                        </div>
+                        <p class="mb-0" th:text="${review.comment}">Excellent piece.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4" th:if="${canReview}">
+            <div class="timeless-panel p-4">
+                <h4 class="fw-bold mb-3">Leave a Review</h4>
+                <form id="reviewForm">
+                    <div class="mb-3">
+                        <label class="form-label" for="rating">Rating</label>
+                        <select id="rating" class="form-select" required>
+                            <option value="5">5 - Excellent</option>
+                            <option value="4">4 - Very Good</option>
+                            <option value="3">3 - Good</option>
+                            <option value="2">2 - Fair</option>
+                            <option value="1">1 - Poor</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="comment">Comment</label>
+                        <textarea id="comment" class="form-control" rows="5" placeholder="Share your experience with this watch"></textarea>
+                    </div>
+                    <button class="btn btn-timeless-primary w-100" type="submit">Submit Review</button>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{layout/base :: footerScripts}"></div>
+<script th:if="${canReview}" th:inline="javascript">
+    document.getElementById('reviewForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        submitReview([[${watch.id}]], [[${reviewOrderId}]], parseInt(document.getElementById('rating').value, 10), document.getElementById('comment').value);
+    });
+</script>
+</body>
+</html>
