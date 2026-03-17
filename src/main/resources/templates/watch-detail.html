@@ -46,13 +46,51 @@
                     </div>
                 </div>
 
+                <!-- Stock availability badge -->
+                <div class="mb-3"
+                     th:with="threshold=3">
+                  <span th:if="${watch.stockQuantity != null and watch.stockQuantity >= threshold}"
+                        class="stock-badge in-stock">
+                    ✓ In Stock (<span th:text="${watch.stockQuantity}">5</span> available)
+                  </span>
+                    <span th:if="${watch.stockQuantity == null or watch.stockQuantity < threshold}"
+                          class="stock-badge out-of-stock">
+                    ✗ Stock Out
+                  </span>
+                </div>
+
                 <p class="text-muted mb-4" th:text="${watch.description != null ? watch.description : 'No description provided.'}">Description</p>
 
-                <div class="d-flex flex-wrap gap-2 mb-4" th:if="${currentRole == 'BUYER'}">
-                    <button class="btn btn-timeless-primary" th:onclick="|addToCart(${watch.id})|">Add to Cart</button>
-                    <button class="btn btn-timeless-outline" th:onclick="|addToWishlist(${watch.id})|">Add to Wishlist</button>
+                <!-- BUYER: qty stepper + add to cart -->
+                <div th:if="${currentRole == 'BUYER' and watch.status == 'ACTIVE' and watch.stockQuantity != null and watch.stockQuantity >= 3}"
+                     class="mb-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="qty-stepper">
+                            <button class="qty-btn" onclick="detailQty(-1)">−</button>
+                            <span class="qty-value" id="detailQtyVal">1</span>
+                            <button class="qty-btn" onclick="detailQty(1)">+</button>
+                        </div>
+                        <input type="hidden" id="detailMaxStock"
+                               th:value="${watch.stockQuantity}">
+                        <span class="text-muted small">max <span th:text="${watch.stockQuantity}">5</span></span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-timeless-primary"
+                                th:onclick="|addToCartQty(${watch.id}, ${watch.stockQuantity})|">Add to Cart</button>
+                        <button class="btn btn-timeless-outline"
+                                th:onclick="|addToWishlist(${watch.id})|">Add to Wishlist</button>
+                    </div>
                 </div>
-                <div class="d-flex flex-wrap gap-2 mb-4" th:if="${!isAuthenticated or currentRole != 'BUYER'}">
+
+                <!-- BUYER: out of stock -->
+                <div th:if="${currentRole == 'BUYER' and (watch.status != 'ACTIVE' or watch.stockQuantity == null or watch.stockQuantity < 3)}"
+                     class="mb-4">
+                    <div class="alert alert-warning py-2 mb-2">This product is currently unavailable.</div>
+                    <button class="btn btn-timeless-outline"
+                            th:onclick="|addToWishlist(${watch.id})|">Add to Wishlist</button>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mb-4" th:if="${!isAuthenticated or (currentRole != 'BUYER')}">
                     <a class="btn btn-timeless-primary" th:href="@{/login}" th:if="${!isAuthenticated}">Login to Purchase</a>
                     <a class="btn btn-timeless-outline" th:href="@{/seller/watches/{id}/edit(id=${watch.id})}" th:if="${currentRole == 'SELLER' and currentUser != null and currentUser.id == watch.sellerId}">Edit Watch</a>
                     <div class="d-flex flex-wrap gap-2" th:if="${currentRole == 'ADMIN'}">
@@ -122,6 +160,12 @@
         event.preventDefault();
         submitReview([[${watch.id}]], [[${reviewOrderId}]], parseInt(document.getElementById('rating').value, 10), document.getElementById('comment').value);
     });
+</script>
+<script>
+    // Initialise detail qty stepper
+    _detailQty = 1;
+    const _qtyEl = document.getElementById('detailQtyVal');
+    if (_qtyEl) _qtyEl.textContent = '1';
 </script>
 </body>
 </html>
