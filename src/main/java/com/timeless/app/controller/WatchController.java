@@ -44,16 +44,16 @@ public class WatchController {
     @GetMapping
     @Operation(summary = "Get active watches with filtering and pagination")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Watches fetched successfully")
+            @ApiResponse(responseCode = "200", description = "Watches fetched successfully")
     })
     public ResponseEntity<Page<WatchResponse>> getActiveWatches(
-        @RequestParam(required = false) List<String> brands,
-        @RequestParam(required = false) List<String> categories,
-        @RequestParam(required = false) List<String> conditions,
-        @RequestParam(required = false) BigDecimal minPrice,
-        @RequestParam(required = false) BigDecimal maxPrice,
-        @RequestParam(required = false) String search,
-        @ParameterObject Pageable pageable
+            @RequestParam(required = false) List<String> brands,
+            @RequestParam(required = false) List<String> categories,
+            @RequestParam(required = false) List<String> conditions,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) String search,
+            @ParameterObject Pageable pageable
     ) {
         return ResponseEntity.ok(watchService.getActiveWatches(brands, categories, conditions, minPrice, maxPrice, search, pageable));
     }
@@ -69,8 +69,8 @@ public class WatchController {
     @GetMapping("/{id}")
     @Operation(summary = "Get watch detail by id")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Watch fetched successfully", content = @Content(schema = @Schema(implementation = WatchResponse.class))),
-        @ApiResponse(responseCode = "404", description = "Watch not found")
+            @ApiResponse(responseCode = "200", description = "Watch fetched successfully", content = @Content(schema = @Schema(implementation = WatchResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Watch not found")
     })
     public ResponseEntity<WatchResponse> getWatchById(@PathVariable Long id) {
         return ResponseEntity.ok(watchService.getWatchById(id));
@@ -92,12 +92,27 @@ public class WatchController {
         return ResponseEntity.ok(watchService.updateWatch(id, request, user.getId(), user.getRole()));
     }
 
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "JSON body with delta field: positive to increase, negative to decrease",
+            content = @Content(schema = @Schema(example = "{\"delta\": 5}"))
+    )
+    @org.springframework.web.bind.annotation.PatchMapping("/{id}/stock")
+    @PreAuthorize("hasRole('SELLER')")
+    @Operation(summary = "Adjust stock quantity for seller's own watch (+N to add, -N to subtract)")
+    public ResponseEntity<WatchResponse> adjustStock(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, Integer> body) {
+        UserPrincipal user = SecurityUtils.getCurrentUser();
+        int delta = body.getOrDefault("delta", 0);
+        return ResponseEntity.ok(watchService.adjustStock(id, delta, user.getId()));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
     @Operation(summary = "Delete a watch listing")
     @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Watch deleted successfully"),
-        @ApiResponse(responseCode = "403", description = "Forbidden")
+            @ApiResponse(responseCode = "204", description = "Watch deleted successfully"),
+            @ApiResponse(responseCode = "403", description = "Forbidden")
     })
     public ResponseEntity<Void> deleteWatch(@PathVariable Long id) {
         UserPrincipal user = SecurityUtils.getCurrentUser();
