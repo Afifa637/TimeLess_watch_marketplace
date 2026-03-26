@@ -1,7 +1,7 @@
 package com.timeless.app.repository;
 
 import com.timeless.app.entity.Watch;
-import com.timeless.app.entity.WatchCondition;
+// import com.timeless.app.entity.WatchCondition;
 import com.timeless.app.entity.WatchStatus;
 import jakarta.persistence.LockModeType;
 import java.math.BigDecimal;
