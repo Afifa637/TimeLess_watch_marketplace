@@ -288,6 +288,27 @@ public class WatchService {
         return toResponse(watchRepository.save(watch));
     }
 
+    /**
+     * Seller-accessible stock adjustment. delta = +N or -N.
+     * Stock can never go below 0.
+     */
+    @Transactional
+    public WatchResponse adjustStock(Long watchId, int delta, Long sellerId) {
+        Watch watch = watchRepository.findLockedById(watchId)
+                .orElseThrow(() -> new ResourceNotFoundException("Watch not found"));
+        if (!watch.getSeller().getId().equals(sellerId))
+            throw new ForbiddenException("You can only adjust stock for your own watches");
+        int current = watch.getStockQuantity() == null ? 0 : watch.getStockQuantity();
+        int updated = current + delta;
+        if (updated < 0) throw new BadRequestException("Stock cannot go below 0");
+        watch.setStockQuantity(updated);
+        // Auto-manage status based on stock threshold
+        if (updated >= OrderService.STOCK_THRESHOLD && watch.getStatus() == WatchStatus.INACTIVE) {
+            watch.setStatus(WatchStatus.ACTIVE);
+        }
+        return toResponse(watchRepository.save(watch));
+    }
+
     public List<WatchResponse> getAllWatchesForAdmin() {
         return watchRepository.findAll().stream()
                 .sorted(Comparator.comparing(Watch::getCreatedAt).reversed())
