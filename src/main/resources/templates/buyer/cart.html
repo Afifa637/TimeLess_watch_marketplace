@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('My Cart | Timeless')}"></head>
+<body>
+<div th:replace="~{layout/base :: navbar}"></div>
+
+<main class="container py-5 main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h1 class="fw-bold mb-1">My Cart</h1>
+            <p class="text-muted mb-0">Review your selected watches before checkout.</p>
+        </div>
+        <a class="btn btn-timeless-primary" th:href="@{/buyer/payment}"
+           th:if="${!cartItems.isEmpty()}">Proceed to Payment →</a>
+    </div>
+
+    <div th:if="${cartItems.isEmpty()}" class="empty-state">
+        <h4 class="fw-bold">Your cart is empty</h4>
+        <p class="text-muted">Start exploring premium listings and add your favorites to cart.</p>
+        <a class="btn btn-timeless-primary" th:href="@{/watches}">Browse Watches</a>
+    </div>
+
+    <div th:if="${!cartItems.isEmpty()}" class="timeless-panel p-3 p-lg-4">
+        <div class="table-responsive">
+            <table class="table-timeless">
+                <thead>
+                <tr>
+                    <th>Watch</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${cartItems}">
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <img class="table-thumb"
+                                 th:src="${item.watchImageUrl != null ? item.watchImageUrl : 'https://via.placeholder.com/150?text=⌚'}"
+                                 alt="Watch image">
+                            <div>
+                                <strong th:text="${item.watchName}">Watch Name</strong>
+                                <div class="text-muted" th:text="${item.watchBrand}">Brand</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td th:text="${'৳' + #numbers.formatDecimal(item.price, 1, 'COMMA', 2, 'POINT')}">৳1,000</td>
+                    <td>
+                        <!-- Quantity stepper -->
+                        <div class="qty-stepper">
+                            <button class="qty-btn" th:onclick="|cartQty(${item.watchId}, -1)|"
+                                    title="Decrease">−</button>
+                            <span class="qty-value" th:text="${item.quantity}" th:id="|qty-${item.watchId}|">1</span>
+                            <button class="qty-btn" th:onclick="|cartQty(${item.watchId}, 1)|"
+                                    title="Increase">+</button>
+                        </div>
+                    </td>
+                    <td th:text="${'৳' + #numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}"
+                        th:id="|sub-${item.watchId}|">৳1,000</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-danger"
+                                th:onclick="|removeFromCart(${item.watchId})|">Remove</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center pt-3 flex-wrap gap-3">
+            <button class="btn btn-timeless-outline btn-sm" onclick="clearCartFull()">Clear Cart</button>
+            <div class="timeless-panel px-4 py-3 d-flex gap-4 align-items-center">
+                <div>
+                    <div class="text-muted small">Total</div>
+                    <div class="price-text" id="cartGrandTotal"
+                         th:text="${'৳' + #numbers.formatDecimal(cartTotal, 1, 'COMMA', 2, 'POINT')}">৳0.00</div>
+                </div>
+                <a class="btn btn-timeless-primary" th:href="@{/buyer/payment}">
+                    Proceed to Payment →
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{layout/base :: footerScripts}"></div>
+<script>
+    async function cartQty(watchId, delta) {
+      try {
+        const res = await apiFetch(`/api/cart/${watchId}/quantity`, 'PATCH', { delta });
+        if (res && res.quantity !== undefined) {
+          document.getElementById('qty-' + watchId).textContent = res.quantity;
+          if (res.subtotal !== undefined) {
+            document.getElementById('sub-' + watchId).textContent =
+              '৳' + parseFloat(res.subtotal).toLocaleString('en-US', {minimumFractionDigits:2});
+          }
+        }
+        setTimeout(() => window.location.reload(), 200);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+    async function clearCartFull() {
+      if (!confirm('Clear your entire cart?')) return;
+      try {
+        await apiFetch('/api/cart', 'DELETE');
+        window.location.reload();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+</script>
+</body>
+</html>
