@@ -53,7 +53,7 @@
 
                             <button class="btn btn-sm btn-timeless-outline"
                                     th:if="${order.status == 'PROCESSING'}"
-                                    th:onclick="|const tracking = prompt('Enter tracking number'); if (tracking) { updateOrderStatus(${order.id}, 'SHIPPED', tracking); }|">
+                                    th:onclick="|markShipped(${order.id})|">
                                 Mark as Shipped
                             </button>
 
