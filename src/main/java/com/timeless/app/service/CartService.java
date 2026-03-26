@@ -18,7 +18,7 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final UserAccountRepository userAccountRepository;
     private final WatchRepository watchRepository;
-    private final OrderService orderService;
+//     private final OrderService orderService;
 
     @Transactional
     public CartItemResponse addToCart(Long watchId, Long buyerId) {
