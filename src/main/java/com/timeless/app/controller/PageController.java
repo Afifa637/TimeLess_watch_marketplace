@@ -2,7 +2,7 @@ package com.timeless.app.controller;
 
 import com.timeless.app.dto.response.CartItemResponse;
 import com.timeless.app.dto.response.OrderResponse;
-// import com.timeless.app.dto.response.ReviewResponse;
+import com.timeless.app.dto.response.ReviewResponse;
 import com.timeless.app.dto.response.WatchCardResponse;
 import com.timeless.app.dto.response.WatchResponse;
 import com.timeless.app.dto.response.WishlistItemResponse;
@@ -13,7 +13,7 @@ import com.timeless.app.repository.UserAccountRepository;
 import com.timeless.app.security.UserPrincipal;
 import com.timeless.app.service.CartService;
 import com.timeless.app.service.OrderService;
-// import com.timeless.app.service.ReviewService;
+import com.timeless.app.service.ReviewService;
 import com.timeless.app.service.WatchService;
 import com.timeless.app.service.WishlistService;
 import com.timeless.app.util.SecurityUtils;
@@ -53,7 +53,7 @@ public class PageController {
     private static final List<String> CONDITION_OPTIONS = List.of("NEW", "LIKE_NEW", "GOOD", "FAIR");
 
     private final WatchService watchService;
-//     private final ReviewService reviewService;
+    private final ReviewService reviewService;
     private final CartService cartService;
     private final WishlistService wishlistService;
     private final OrderService orderService;
@@ -131,24 +131,21 @@ public class PageController {
     @GetMapping("/watches/{id}")
     public String watchDetailPage(@PathVariable Long id, Model model) {
         WatchResponse watch = watchService.getWatchById(id);
-//         List<ReviewResponse> reviews = reviewService.getReviewsForWatch(id);
+        List<ReviewResponse> reviews = reviewService.getReviewsForWatch(id);
         model.addAttribute("watch", watch);
-//         model.addAttribute("reviews", reviews);
-//
-//         Optional<UserPrincipal> currentUser = SecurityUtils.getCurrentUserOptional();
-//         boolean canReview = false;
-//         Long reviewOrderId = null;
-//         if (currentUser.isPresent() && currentUser.get().getRole() == Role.BUYER) {
-//             Optional<com.timeless.app.entity.Order> reviewableOrder = orderService.findReviewableOrderForBuyerAndWatch(currentUser.get().getId(), id);
-//             boolean alreadyReviewed = reviewService.hasBuyerReviewedWatch(currentUser.get().getId(), id);
-//             canReview = reviewableOrder.isPresent() && !alreadyReviewed;
-//             reviewOrderId = reviewableOrder.map(com.timeless.app.entity.Order::getId).orElse(null);
-//         }
-//         model.addAttribute("canReview", canReview);
-//         model.addAttribute("reviewOrderId", reviewOrderId);
-        model.addAttribute("reviews", List.of());
-        model.addAttribute("canReview", false);
-        model.addAttribute("reviewOrderId", null);
+        model.addAttribute("reviews", reviews);
+
+        Optional<UserPrincipal> currentUser = SecurityUtils.getCurrentUserOptional();
+        boolean canReview = false;
+        Long reviewOrderId = null;
+        if (currentUser.isPresent() && currentUser.get().getRole() == Role.BUYER) {
+            Optional<com.timeless.app.entity.Order> reviewableOrder = orderService.findReviewableOrderForBuyerAndWatch(currentUser.get().getId(), id);
+            boolean alreadyReviewed = reviewService.hasBuyerReviewedWatch(currentUser.get().getId(), id);
+            canReview = reviewableOrder.isPresent() && !alreadyReviewed;
+            reviewOrderId = reviewableOrder.map(com.timeless.app.entity.Order::getId).orElse(null);
+        }
+        model.addAttribute("canReview", canReview);
+        model.addAttribute("reviewOrderId", reviewOrderId);
         return "watch-detail";
     }
 
@@ -198,12 +195,11 @@ public class PageController {
     public String buyerOrderDetailPage(@PathVariable Long id, Model model) {
         UserPrincipal buyer = SecurityUtils.getCurrentUser();
         OrderResponse order = orderService.getOrderById(id, buyer.getId(), buyer.getRole());
-//         boolean alreadyReviewed = reviewService.hasBuyerReviewedWatch(buyer.getId(), order.getWatchId());
-//         boolean canReview = "COMPLETED".equals(order.getStatus()) && !alreadyReviewed;
+        boolean alreadyReviewed = reviewService.hasBuyerReviewedWatch(buyer.getId(), order.getWatchId());
+        boolean canReview = "COMPLETED".equals(order.getStatus()) && !alreadyReviewed;
         model.addAttribute("order", order);
         model.addAttribute("watch", watchService.getWatchById(order.getWatchId()));
-//         model.addAttribute("canReview", canReview);
-        model.addAttribute("canReview", false);
+        model.addAttribute("canReview", canReview);
         return "buyer/order-detail";
     }
 

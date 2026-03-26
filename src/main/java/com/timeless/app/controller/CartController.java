@@ -1,14 +1,18 @@
 package com.timeless.app.controller;
 
+import com.timeless.app.dto.request.CartCheckoutRequest;
 import com.timeless.app.dto.response.CartItemResponse;
+import com.timeless.app.dto.response.OrderResponse;
 import com.timeless.app.security.UserPrincipal;
 import com.timeless.app.service.CartService;
 import com.timeless.app.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -68,13 +72,13 @@ public class CartController {
         return ResponseEntity.noContent().build();
     }
 
-//    @PostMapping("/checkout")
-//    @PreAuthorize("hasRole('BUYER')")
-//    @Operation(summary = "Checkout all cart items — creates orders and processes payment in one step")
-//    public ResponseEntity<List<OrderResponse>> checkout(
-//            @Valid @RequestBody CartCheckoutRequest checkoutRequest) {
-//        UserPrincipal user = SecurityUtils.getCurrentUser();
-//        return ResponseEntity.status(HttpStatus.CREATED)
-//                .body(cartService.checkout(user.getId(), checkoutRequest));
-//    }
+    @PostMapping("/checkout")
+    @PreAuthorize("hasRole('BUYER')")
+    @Operation(summary = "Checkout all cart items — creates orders and processes payment in one step")
+    public ResponseEntity<List<OrderResponse>> checkout(
+            @Valid @RequestBody CartCheckoutRequest checkoutRequest) {
+        UserPrincipal user = SecurityUtils.getCurrentUser();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(cartService.checkout(user.getId(), checkoutRequest));
+    }
 }
