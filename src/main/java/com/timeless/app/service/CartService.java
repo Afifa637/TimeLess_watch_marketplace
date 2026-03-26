@@ -1,10 +1,15 @@
 package com.timeless.app.service;
 
+import com.timeless.app.dto.request.CartCheckoutRequest;
+import com.timeless.app.dto.request.OrderCreateRequest;
+import com.timeless.app.dto.request.PaymentRequest;
 import com.timeless.app.dto.response.CartItemResponse;
+import com.timeless.app.dto.response.OrderResponse;
 import com.timeless.app.entity.*;
 import com.timeless.app.exception.*;
 import com.timeless.app.repository.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +23,8 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final UserAccountRepository userAccountRepository;
     private final WatchRepository watchRepository;
-//     private final OrderService orderService;
+    private final OrderService orderService;
+    private final PaymentService paymentService;
 
     @Transactional
     public CartItemResponse addToCart(Long watchId, Long buyerId) {
@@ -79,34 +85,34 @@ public class CartService {
         cartItemRepository.deleteByBuyerId(buyerId);
     }
 
-//    /**
-//     * Checkout: create one Order per cart item (with quantity), then one Payment
-//     * for each order using the buyer-supplied method and account reference.
-//     */
-//    @Transactional
-//    public List<OrderResponse> checkout(Long buyerId, CartCheckoutRequest checkoutReq) {
-//        getBuyer(buyerId);
-//        List<CartItem> items = cartItemRepository.findByBuyerId(buyerId);
-//        if (items.isEmpty()) throw new BadRequestException("Cart is empty");
-//
-//        List<OrderResponse> orders = new ArrayList<>();
-//        for (CartItem item : items) {
-//            OrderCreateRequest req = new OrderCreateRequest(item.getWatch().getId(), item.getQuantity());
-//            OrderResponse created = orderService.placeOrder(req, buyerId);
-//
-//            // simulate payment immediately
-//            PaymentRequest payReq = new PaymentRequest(
-//                    created.getId(),
-//                    checkoutReq.getMethod(),
-//                    checkoutReq.getPaymentAccountRef()
-//            );
-//            paymentService.initiatePayment(payReq, buyerId);
-//            // re-fetch to include payment method in response
-//            orders.add(orderService.getOrderById(created.getId(), buyerId, Role.BUYER));
-//        }
-//        cartItemRepository.deleteByBuyerId(buyerId);
-//        return orders;
-//    }
+    /**
+     * Checkout: create one Order per cart item (with quantity), then one Payment
+     * for each order using the buyer-supplied method and account reference.
+     */
+    @Transactional
+    public List<OrderResponse> checkout(Long buyerId, CartCheckoutRequest checkoutReq) {
+        getBuyer(buyerId);
+        List<CartItem> items = cartItemRepository.findByBuyerId(buyerId);
+        if (items.isEmpty()) throw new BadRequestException("Cart is empty");
+
+        List<OrderResponse> orders = new ArrayList<>();
+        for (CartItem item : items) {
+            OrderCreateRequest req = new OrderCreateRequest(item.getWatch().getId(), item.getQuantity());
+            OrderResponse created = orderService.placeOrder(req, buyerId);
+
+            // simulate payment immediately
+            PaymentRequest payReq = new PaymentRequest(
+                    created.getId(),
+                    checkoutReq.getMethod(),
+                    checkoutReq.getPaymentAccountRef()
+            );
+            paymentService.initiatePayment(payReq, buyerId);
+            // re-fetch to include payment method in response
+            orders.add(orderService.getOrderById(created.getId(), buyerId, Role.BUYER));
+        }
+        cartItemRepository.deleteByBuyerId(buyerId);
+        return orders;
+    }
 
     public long countCartItems(Long buyerId) {
         return cartItemRepository.findByBuyerId(buyerId).stream()
