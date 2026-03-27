@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;NON_KEYWORDS=YEAR
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+
+  liquibase:
+    enabled: false
+
+app:
+  jwt:
+    secret: test-secret-key-for-unit-testing-only-must-be-32-chars
+    expiration-ms: 3600000
+  bootstrap:
+    enabled: false
+  admin:
+    email: admin@test.com
+    password: Admin123!
