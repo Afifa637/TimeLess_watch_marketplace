@@ -5,6 +5,14 @@
 <div th:replace="~{layout/base :: navbar}"></div>
 
 <main class="container py-5 main-content">
+    <div class="watches-headline d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <span class="listing-kicker">Curated drops</span>
+            <h1 class="watches-title mb-1">Browse Watches</h1>
+            <p class="listing-count mb-0" th:text="${watchPage.totalElements + ' active listings available'}">0 active listings available</p>
+        </div>
+    </div>
+
     <div class="row g-4">
         <div class="col-lg-3">
             <form method="get" th:action="@{/watches}" class="filter-sidebar">
@@ -90,13 +98,6 @@
         </div>
 
         <div class="col-lg-9">
-            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <div>
-                    <h1 class="fw-bold mb-1">Browse Watches</h1>
-                    <p class="text-muted mb-0" th:text="${watchPage.totalElements + ' active listings available'}">0 active listings available</p>
-                </div>
-            </div>
-
             <div th:if="${watchPage.totalElements == 0}" class="empty-state">
                 <h4 class="fw-bold">No watches found</h4>
                 <p class="text-muted">Try adjusting your filters to broaden the search.</p>

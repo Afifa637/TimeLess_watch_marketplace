@@ -77,7 +77,7 @@
                     <div class="d-flex flex-wrap gap-2">
                         <button class="btn btn-timeless-primary"
                                 th:onclick="|addToCartQty(${watch.id}, ${watch.stockQuantity})|">Add to Cart</button>
-                        <button class="btn btn-timeless-outline"
+                        <button class="btn btn-classic-outline"
                                 th:onclick="|addToWishlist(${watch.id})|">Add to Wishlist</button>
                     </div>
                 </div>
@@ -86,7 +86,7 @@
                 <div th:if="${currentRole == 'BUYER' and (watch.status != 'ACTIVE' or watch.stockQuantity == null or watch.stockQuantity < 3)}"
                      class="mb-4">
                     <div class="alert alert-warning py-2 mb-2">This product is currently unavailable.</div>
-                    <button class="btn btn-timeless-outline"
+                    <button class="btn btn-classic-outline"
                             th:onclick="|addToWishlist(${watch.id})|">Add to Wishlist</button>
                 </div>
 
