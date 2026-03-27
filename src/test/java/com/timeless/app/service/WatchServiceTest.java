@@ -42,19 +42,21 @@ class WatchServiceTest {
     @Mock private CartItemRepository cartItemRepository;
     @Mock private WishlistItemRepository wishlistItemRepository;
     @Mock private ReviewRepository reviewRepository;
+    @Mock private FileStorageService fileStorageService;
 
     private WatchService watchService;
 
     @BeforeEach
     void setUp() {
         watchService = new WatchService(
-            watchRepository,
-            userAccountRepository,
-            orderRepository,
-            paymentRepository,
-            cartItemRepository,
-            wishlistItemRepository,
-            reviewRepository
+                watchRepository,
+                userAccountRepository,
+                orderRepository,
+                paymentRepository,
+                cartItemRepository,
+                wishlistItemRepository,
+                reviewRepository,
+                fileStorageService
         );
     }
 
@@ -62,13 +64,13 @@ class WatchServiceTest {
     void createWatch_asSeller_setsStatusToPendingReview() {
         UserAccount seller = seller(1L);
         WatchCreateRequest request = WatchCreateRequest.builder()
-            .name("Rolex Datejust")
-            .brand("Rolex")
-            .category("Dress")
-            .condition("LIKE_NEW")
-            .price(new BigDecimal("5000.00"))
-            .stockQuantity(1)
-            .build();
+                .name("Rolex Datejust")
+                .brand("Rolex")
+                .category("Dress")
+                .condition("LIKE_NEW")
+                .price(new BigDecimal("5000.00"))
+                .stockQuantity(1)
+                .build();
 
         when(userAccountRepository.findById(1L)).thenReturn(Optional.of(seller));
         when(watchRepository.save(any(Watch.class))).thenAnswer(invocation -> {
@@ -77,7 +79,7 @@ class WatchServiceTest {
             return watch;
         });
 
-        WatchResponse response = watchService.createWatch(request, 1L);
+        WatchResponse response = watchService.createWatch(request, null, 1L);
 
         assertThat(response.getStatus()).isEqualTo("PENDING_REVIEW");
         assertThat(response.getSellerId()).isEqualTo(1L);
@@ -88,14 +90,14 @@ class WatchServiceTest {
         UserAccount seller = seller(1L);
         Watch watch = sampleWatch(10L, seller);
         WatchUpdateRequest request = WatchUpdateRequest.builder()
-            .name("Updated Name")
-            .price(new BigDecimal("6500.00"))
-            .build();
+                .name("Updated Name")
+                .price(new BigDecimal("6500.00"))
+                .build();
 
         when(watchRepository.findById(10L)).thenReturn(Optional.of(watch));
         when(watchRepository.save(any(Watch.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        WatchResponse response = watchService.updateWatch(10L, request, 1L, Role.SELLER);
+        WatchResponse response = watchService.updateWatch(10L, request, null, 1L, Role.SELLER);
 
         assertThat(response.getName()).isEqualTo("Updated Name");
         assertThat(response.getPrice()).isEqualByComparingTo("6500.00");
@@ -108,8 +110,8 @@ class WatchServiceTest {
 
         when(watchRepository.findById(10L)).thenReturn(Optional.of(watch));
 
-        assertThatThrownBy(() -> watchService.updateWatch(10L, new WatchUpdateRequest(), 1L, Role.SELLER))
-            .isInstanceOf(ForbiddenException.class);
+        assertThatThrownBy(() -> watchService.updateWatch(10L, new WatchUpdateRequest(), null, 1L, Role.SELLER))
+                .isInstanceOf(ForbiddenException.class);
     }
 
     @Test
@@ -144,7 +146,7 @@ class WatchServiceTest {
         when(watchRepository.findById(10L)).thenReturn(Optional.of(watch));
 
         assertThatThrownBy(() -> watchService.deleteWatch(10L, 1L, Role.SELLER))
-            .isInstanceOf(ForbiddenException.class);
+                .isInstanceOf(ForbiddenException.class);
     }
 
     @Test
@@ -152,7 +154,7 @@ class WatchServiceTest {
         when(watchRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> watchService.getWatchById(99L))
-            .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
@@ -169,21 +171,27 @@ class WatchServiceTest {
     }
 
     private UserAccount seller(Long id) {
-        return UserAccount.builder().id(id).fullName("Seller").email("seller@test.com").role(Role.SELLER).enabled(true).build();
+        return UserAccount.builder()
+                .id(id)
+                .fullName("Seller")
+                .email("seller@test.com")
+                .role(Role.SELLER)
+                .enabled(true)
+                .build();
     }
 
     private Watch sampleWatch(Long id, UserAccount seller) {
         return Watch.builder()
-            .id(id)
-            .seller(seller)
-            .name("Sample Watch")
-            .brand("Rolex")
-            .category("Luxury")
-            .condition(WatchCondition.GOOD)
-            .price(new BigDecimal("6000.00"))
-            .stockQuantity(1)
-            .status(WatchStatus.ACTIVE)
-            .reviews(new java.util.ArrayList<>())
-            .build();
+                .id(id)
+                .seller(seller)
+                .name("Sample Watch")
+                .brand("Rolex")
+                .category("Luxury")
+                .condition(WatchCondition.GOOD)
+                .price(new BigDecimal("6000.00"))
+                .stockQuantity(1)
+                .status(WatchStatus.ACTIVE)
+                .reviews(new java.util.ArrayList<>())
+                .build();
     }
 }

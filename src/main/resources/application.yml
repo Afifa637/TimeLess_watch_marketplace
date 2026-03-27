@@ -19,8 +19,13 @@ spring:
     enabled: true
   thymeleaf:
     cache: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 
 app:
+  upload-dir: uploads
   jwt:
     secret: ${JWT_SECRET}
     expiration-ms: ${JWT_EXPIRY}
