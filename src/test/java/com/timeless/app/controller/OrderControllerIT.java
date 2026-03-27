@@ -1,7 +1,9 @@
 package com.timeless.app.controller;
 
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -20,10 +22,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -34,12 +38,16 @@ class OrderControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private ObjectMapper objectMapper;
+
     @Autowired
     private WatchRepository watchRepository;
+
     @Autowired
     private UserAccountRepository userAccountRepository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -50,12 +58,13 @@ class OrderControllerIT {
         String buyerToken = registerAndGetToken("buyer-order@test.com", "Buyer123!", "BUYER");
 
         mockMvc.perform(post("/api/orders")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + buyerToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"watchId\":" + watchId + "}"))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id", notNullValue()))
-            .andExpect(jsonPath("$.status").value("PENDING"));
+                        .with(csrf())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + buyerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"watchId\":" + watchId + "}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.status").value("PENDING"));
     }
 
     @Test
@@ -64,10 +73,11 @@ class OrderControllerIT {
         Long watchId = createAndActivateWatch(sellerToken);
 
         mockMvc.perform(post("/api/orders")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + sellerToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"watchId\":" + watchId + "}"))
-            .andExpect(status().isForbidden());
+                        .with(csrf())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + sellerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"watchId\":" + watchId + "}"))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -77,30 +87,32 @@ class OrderControllerIT {
         String buyerToken = registerAndGetToken("buyer-myorders@test.com", "Buyer123!", "BUYER");
 
         mockMvc.perform(post("/api/orders")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + buyerToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"watchId\":" + watchId + "}"))
-            .andExpect(status().isCreated());
+                        .with(csrf())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + buyerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"watchId\":" + watchId + "}"))
+                .andExpect(status().isCreated());
 
         mockMvc.perform(get("/api/orders/my")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + buyerToken))
-            .andExpect(status().isOk());
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + buyerToken))
+                .andExpect(status().isOk());
     }
 
     @Test
     void getAllOrders_asAdmin_returns200() throws Exception {
         userAccountRepository.save(UserAccount.builder()
-            .email("admin@test.com")
-            .passwordHash(passwordEncoder.encode("Admin123!"))
-            .fullName("Admin")
-            .role(Role.ADMIN)
-            .enabled(true)
-            .build());
+                .email("admin@test.com")
+                .passwordHash(passwordEncoder.encode("Admin123!"))
+                .fullName("Admin")
+                .role(Role.ADMIN)
+                .enabled(true)
+                .build());
+
         String adminToken = loginAndGetToken("admin@test.com", "Admin123!");
 
         mockMvc.perform(get("/api/orders")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
-            .andExpect(status().isOk());
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -108,28 +120,37 @@ class OrderControllerIT {
         String buyerToken = registerAndGetToken("buyer-allorders@test.com", "Buyer123!", "BUYER");
 
         mockMvc.perform(get("/api/orders")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + buyerToken))
-            .andExpect(status().isForbidden());
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + buyerToken))
+                .andExpect(status().isForbidden());
     }
 
     private Long createAndActivateWatch(String sellerToken) throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/watches")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + sellerToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                      "name":"Order Flow Watch",
-                      "brand":"Omega",
-                      "category":"Sport",
-                      "condition":"GOOD",
-                      "price":5200.00,
-                      "stockQuantity":3
-                    }
-                    """))
-            .andExpect(status().isCreated())
-            .andReturn();
+        MockMultipartHttpServletRequestBuilder requestBuilder = multipart("/api/watches");
+        requestBuilder.with(csrf());
+        requestBuilder.file(new MockMultipartFile(
+                "imageFile",
+                "watch.png",
+                MediaType.IMAGE_PNG_VALUE,
+                "fake-image-content".getBytes()
+        ));
+        requestBuilder.contentType(MediaType.MULTIPART_FORM_DATA);
+        requestBuilder.header(HttpHeaders.AUTHORIZATION, "Bearer " + sellerToken);
+        requestBuilder.param("name", "Order Flow Watch");
+        requestBuilder.param("brand", "Omega");
+        requestBuilder.param("category", "Sport");
+        requestBuilder.param("condition", "GOOD");
+        requestBuilder.param("price", "5200.00");
+        requestBuilder.param("stockQuantity", "3");
 
-        Long watchId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
+        MvcResult result = mockMvc.perform(requestBuilder)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id", notNullValue()))
+                .andReturn();
+
+        Long watchId = objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("id")
+                .asLong();
+
         Watch watch = watchRepository.findById(watchId).orElseThrow();
         watch.setStatus(WatchStatus.ACTIVE);
         watchRepository.save(watch);
@@ -138,26 +159,32 @@ class OrderControllerIT {
 
     private String registerAndGetToken(String email, String password, String role) throws Exception {
         String body = String.format(
-            "{\"email\":\"%s\",\"password\":\"%s\",\"fullName\":\"%s\",\"role\":\"%s\"}",
-            email,
-            password,
-            role + " User",
-            role
+                "{\"email\":\"%s\",\"password\":\"%s\",\"fullName\":\"%s\",\"role\":\"%s\"}",
+                email,
+                password,
+                role + " User",
+                role
         );
+
         MvcResult result = mockMvc.perform(post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
-            .andReturn();
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andReturn();
+
         JsonNode jsonNode = objectMapper.readTree(result.getResponse().getContentAsString());
         return jsonNode.get("token").asText();
     }
 
     private String loginAndGetToken(String email, String password) throws Exception {
         String body = String.format("{\"email\":\"%s\",\"password\":\"%s\"}", email, password);
+
         MvcResult result = mockMvc.perform(post("/api/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
-            .andReturn();
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andReturn();
+
         JsonNode jsonNode = objectMapper.readTree(result.getResponse().getContentAsString());
         return jsonNode.get("token").asText();
     }
