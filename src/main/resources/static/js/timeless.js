@@ -18,20 +18,29 @@ function clearAuthToken() {
 async function apiFetch(url, method = 'GET', body = null) {
     const headers = { ...getAuthHeader() };
     const options = { method, headers, credentials: 'include' };
+
     if (body !== null) {
-        headers['Content-Type'] = 'application/json';
-        options.body = JSON.stringify(body);
+        if (body instanceof FormData) {
+            options.body = body;
+        } else {
+            headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(body);
+        }
     }
+
     const response = await fetch(url, options);
     const text = await response.text();
     let data = null;
+
     if (text) {
         try { data = JSON.parse(text); } catch { data = text; }
     }
+
     if (!response.ok) {
         const message = data?.message || data?.error || data || 'Request failed';
         throw new Error(message);
     }
+
     return data;
 }
 
@@ -101,10 +110,8 @@ async function addToCart(watchId) {
     } catch (err) { showToast(err.message, 'error'); }
 }
 
-// Called from watch-detail page — adds the stepper quantity in one shot
 let _detailQty = 1;
 function detailQty(delta) {
-    // read max from a data attribute on the stepper container if present
     const maxEl = document.getElementById('detailMaxStock');
     const max = maxEl ? parseInt(maxEl.value) : 999;
     _detailQty = Math.max(1, Math.min(_detailQty + delta, max));
@@ -112,9 +119,7 @@ function detailQty(delta) {
 }
 async function addToCartQty(watchId, maxStock) {
     try {
-        // add 1 first
         await apiFetch(`/api/cart/${watchId}`, 'POST');
-        // increment the rest via PATCH
         for (let i = 1; i < _detailQty; i++) {
             await apiFetch(`/api/cart/${watchId}/quantity`, 'PATCH', { delta: 1 });
         }
@@ -131,7 +136,6 @@ async function removeFromCart(watchId) {
     } catch (err) { showToast(err.message, 'error'); }
 }
 
-// Quantity stepper on cart page
 async function cartQty(watchId, delta) {
     try {
         const res = await apiFetch(`/api/cart/${watchId}/quantity`, 'PATCH', { delta });
@@ -195,11 +199,11 @@ async function updateOrderStatus(orderId, status, trackingNumber = null) {
     } catch (err) { showToast(err.message, 'error'); }
 }
 
-// Seller: mark shipped (prompts for tracking number)
 async function markShipped(orderId) {
     const tracking = prompt('Enter tracking number:');
     if (!tracking || !tracking.trim()) {
-        showToast('Tracking number is required.', 'error'); return;
+        showToast('Tracking number is required.', 'error');
+        return;
     }
     await updateOrderStatus(orderId, 'SHIPPED', tracking.trim());
 }
@@ -267,23 +271,48 @@ async function submitReview(watchId, orderId, rating, comment) {
 
 // ── Watch form helpers ────────────────────────────────────────────────────
 async function createWatchFromForm(form) {
-    const payload = Object.fromEntries(new FormData(form).entries());
-    payload.price = Number(payload.price);
-    payload.stockQuantity = Number(payload.stockQuantity || 1);
-    payload.year = payload.year ? Number(payload.year) : null;
+    const formData = new FormData(form);
+
+    const price = formData.get('price');
+    const stockQuantity = formData.get('stockQuantity');
+    const year = formData.get('year');
+
+    if (price !== null && price !== '') {
+        formData.set('price', Number(price));
+    }
+    if (stockQuantity !== null && stockQuantity !== '') {
+        formData.set('stockQuantity', Number(stockQuantity));
+    }
+    if (year !== null && year !== '') {
+        formData.set('year', Number(year));
+    }
+
     try {
-        await apiFetch('/api/watches', 'POST', payload);
+        await apiFetch('/api/watches', 'POST', formData);
         showToast('Listing submitted for review.', 'success');
         setTimeout(() => { window.location.href = '/seller/dashboard'; }, 500);
     } catch (err) { showToast(err.message, 'error'); }
 }
+
 async function updateWatchFromForm(watchId, form) {
-    const payload = Object.fromEntries(new FormData(form).entries());
-    payload.price = payload.price ? Number(payload.price) : null;
-    payload.stockQuantity = payload.stockQuantity ? Number(payload.stockQuantity) : null;
-    payload.year = payload.year ? Number(payload.year) : null;
+    const formData = new FormData(form);
+
+    const price = formData.get('price');
+    const stockQuantity = formData.get('stockQuantity');
+    const year = formData.get('year');
+
+    if (price !== null && price !== '') {
+        formData.set('price', Number(price));
+    }
+    if (stockQuantity !== null && stockQuantity !== '') {
+        formData.set('stockQuantity', Number(stockQuantity));
+    }
+    if (year !== null && year !== '') {
+        formData.set('year', Number(year));
+    }
+
     try {
-        await apiFetch(`/api/watches/${watchId}`, 'PUT', payload);
+        await apiFetch(`/api/watches/${watchId}`, 'PUT', formData);
         showToast('Listing updated and resubmitted for review.', 'success');
         setTimeout(() => { window.location.href = '/seller/dashboard'; }, 500);
     } catch (err) { showToast(err.message, 'error'); }
@@ -292,6 +321,9 @@ async function updateWatchFromForm(watchId, form) {
 // ── DOMContentLoaded ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-logout]').forEach(link => {
-        link.addEventListener('click', e => { e.preventDefault(); logoutUser(); });
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            logoutUser();
+        });
     });
 });

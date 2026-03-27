@@ -15,7 +15,7 @@
                         <h5 class="fw-bold mb-0">Stock Management</h5>
                         <p class="text-muted small mb-0">Adjust live inventory without re-submitting for review.</p>
                     </div>
-                    <!-- Live stock indicator -->
+
                     <span th:if="${watch.stockQuantity != null and watch.stockQuantity >= 3}"
                           class="stock-badge in-stock">
                         ✓ In Stock — <span th:text="${watch.stockQuantity}">0</span> units
@@ -72,13 +72,14 @@
                           th:text="${watch.status}">PENDING_REVIEW</span>
                 </div>
 
-                <form id="editWatchForm" class="needs-validation" novalidate>
+                <form id="editWatchForm" class="needs-validation" novalidate enctype="multipart/form-data">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Name</label>
                             <input type="text" name="name" class="form-control" required
                                    th:value="${watch.name}">
                         </div>
+
                         <div class="col-md-6">
                             <label class="form-label">Brand</label>
                             <select name="brand" class="form-select" required>
@@ -87,6 +88,7 @@
                                         th:selected="${brand == watch.brand}"></option>
                             </select>
                         </div>
+
                         <div class="col-md-4">
                             <label class="form-label">Category</label>
                             <select name="category" class="form-select" required>
@@ -95,6 +97,7 @@
                                         th:selected="${cat == watch.category}"></option>
                             </select>
                         </div>
+
                         <div class="col-md-4">
                             <label class="form-label">Condition</label>
                             <select name="condition" class="form-select" required>
@@ -103,32 +106,47 @@
                                         th:selected="${cond == watch.condition}"></option>
                             </select>
                         </div>
+
                         <div class="col-md-4">
                             <label class="form-label">Price (৳)</label>
                             <input type="number" min="1" step="0.01" name="price"
                                    class="form-control" required th:value="${watch.price}">
                         </div>
+
                         <div class="col-md-4">
                             <label class="form-label">Stock Quantity</label>
                             <input type="number" min="0" step="1" name="stockQuantity"
                                    class="form-control" required th:value="${watch.stockQuantity}">
                             <div class="form-text">Used when re-submitting the full form. Use the quick-adjust above for live stock changes.</div>
                         </div>
+
                         <div class="col-md-4">
                             <label class="form-label">Year</label>
                             <input type="number" min="1900" step="1" name="year"
                                    class="form-control" th:value="${watch.year}">
                         </div>
+
                         <div class="col-md-4">
                             <label class="form-label">Reference Number</label>
                             <input type="text" name="referenceNumber" class="form-control"
                                    th:value="${watch.referenceNumber}">
                         </div>
+
                         <div class="col-12">
-                            <label class="form-label">Image URL</label>
-                            <input type="url" name="imageUrl" class="form-control"
-                                   th:value="${watch.imageUrl}">
+                            <label class="form-label">Replace Watch Image</label>
+                            <input type="file" name="imageFile" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+                            <div class="form-text">Leave empty to keep the current image.</div>
                         </div>
+
+                        <div class="col-12" th:if="${watch.imageUrl != null}">
+                            <label class="form-label">Current Image</label>
+                            <div>
+                                <img th:src="${watch.imageUrl}"
+                                     alt="Current watch image"
+                                     style="max-width: 220px; border-radius: 12px;">
+                            </div>
+                        </div>
+
                         <div class="col-12">
                             <label class="form-label">Description</label>
                             <textarea name="description" class="form-control" rows="6"
@@ -167,16 +185,22 @@
         const input = document.getElementById('exactStockInput');
         const newVal = parseInt(input.value);
         if (isNaN(newVal) || newVal < 0) {
-            showToast('Please enter a valid quantity (0 or more).', 'error'); return;
+            showToast('Please enter a valid quantity (0 or more).', 'error');
+            return;
         }
         const current = parseInt(document.getElementById('liveStockVal').textContent) || 0;
         const delta = newVal - current;
-        if (delta === 0) { showToast('No change.', 'info'); return; }
+        if (delta === 0) {
+            showToast('No change.', 'info');
+            return;
+        }
         try {
             await apiFetch(`/api/watches/${watchId}/stock`, 'PATCH', { delta });
             showToast('Stock updated to ' + newVal + '.', 'success');
             setTimeout(() => window.location.reload(), 400);
-        } catch(err) { showToast(err.message, 'error'); }
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
     }
 </script>
 </body>
