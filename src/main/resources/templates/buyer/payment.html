@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Payment | Timeless')}"></head>
+<body>
+<div th:replace="~{layout/base :: navbar}"></div>
+
+<main class="container py-5 main-content page-narrow">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h1 class="fw-bold mb-1">Secure Checkout</h1>
+            <p class="text-muted mb-0">Complete your purchase with a classic, trusted payment flow.</p>
+        </div>
+        <a class="btn btn-timeless-outline" th:href="@{/buyer/cart}">Back to Cart</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="timeless-panel p-4 p-lg-5">
+                <h4 class="fw-bold mb-3">Payment Method</h4>
+                <p class="text-muted">All payments are simulated for this prototype experience.</p>
+                <form id="paymentForm" class="mt-4">
+                    <div class="mb-3">
+                        <label class="form-label" for="paymentMethod">Select a method</label>
+                        <select id="paymentMethod" class="form-select" required>
+                            <option value="" disabled selected>Choose a payment method</option>
+                            <option th:each="method : ${paymentMethods}"
+                                    th:value="${method}"
+                                    th:text="${method}">BKASH</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label" for="paymentRef">Payment account reference</label>
+                        <input id="paymentRef" class="form-control" type="text"
+                               placeholder="Phone, card number, or account reference">
+                        <small class="text-muted">Use any value to simulate a successful payment.</small>
+                    </div>
+                    <button class="btn btn-timeless-primary w-100" type="submit">Confirm Payment</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="timeless-panel p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold mb-0">Order Summary</h4>
+                    <span class="badge-status ACTIVE">Ready</span>
+                </div>
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex justify-content-between align-items-center" th:each="item : ${cartItems}">
+                        <div>
+                            <div class="fw-semibold" th:text="${item.watchName}">Watch Name</div>
+                            <div class="text-muted small" th:text="${item.watchBrand + ' • Qty ' + item.quantity}">Brand • Qty</div>
+                        </div>
+                        <div class="fw-semibold" th:text="${'৳' + #numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}">৳0.00</div>
+                    </div>
+                </div>
+                <hr class="my-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted">Total</div>
+                    <div class="price-text" th:text="${'৳' + #numbers.formatDecimal(cartTotal, 1, 'COMMA', 2, 'POINT')}">৳0.00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{layout/base :: footerScripts}"></div>
+<script>
+    document.getElementById('paymentForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const method = document.getElementById('paymentMethod').value;
+        const paymentAccountRef = document.getElementById('paymentRef').value;
+        if (!method) {
+            showToast('Please select a payment method.', 'error');
+            return;
+        }
+        try {
+            await apiFetch('/api/cart/checkout', 'POST', { method, paymentAccountRef });
+            showToast('Payment processed successfully.', 'success');
+            setTimeout(() => { window.location.href = '/buyer/orders'; }, 600);
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    });
+</script>
+</body>
+</html>
