@@ -7,7 +7,6 @@ import com.timeless.app.security.UserPrincipal;
 import com.timeless.app.service.WatchService;
 import com.timeless.app.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
-// import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,22 +15,28 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/watches")
@@ -55,7 +60,11 @@ public class WatchController {
             @RequestParam(required = false) String search,
             @ParameterObject Pageable pageable
     ) {
-        return ResponseEntity.ok(watchService.getActiveWatches(brands, categories, conditions, minPrice, maxPrice, search, pageable));
+        return ResponseEntity.ok(
+                watchService.getActiveWatches(
+                        brands, categories, conditions, minPrice, maxPrice, search, pageable
+                )
+        );
     }
 
     @GetMapping("/my")
@@ -69,39 +78,50 @@ public class WatchController {
     @GetMapping("/{id}")
     @Operation(summary = "Get watch detail by id")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Watch fetched successfully", content = @Content(schema = @Schema(implementation = WatchResponse.class))),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Watch fetched successfully",
+                    content = @Content(schema = @Schema(implementation = WatchResponse.class))
+            ),
             @ApiResponse(responseCode = "404", description = "Watch not found")
     })
     public ResponseEntity<WatchResponse> getWatchById(@PathVariable Long id) {
         return ResponseEntity.ok(watchService.getWatchById(id));
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('SELLER')")
     @Operation(summary = "Create a new watch listing as seller")
-    public ResponseEntity<WatchResponse> createWatch(@Valid @RequestBody WatchCreateRequest request) {
+    public ResponseEntity<WatchResponse> createWatch(
+            @Valid @ModelAttribute WatchCreateRequest request,
+            @RequestPart(value = "imageFile", required = false) MultipartFile imageFile
+    ) {
         UserPrincipal user = SecurityUtils.getCurrentUser();
-        return ResponseEntity.status(HttpStatus.CREATED).body(watchService.createWatch(request, user.getId()));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(watchService.createWatch(request, imageFile, user.getId()));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
     @Operation(summary = "Update an existing watch listing")
-    public ResponseEntity<WatchResponse> updateWatch(@PathVariable Long id, @Valid @RequestBody WatchUpdateRequest request) {
+    public ResponseEntity<WatchResponse> updateWatch(
+            @PathVariable Long id,
+            @Valid @ModelAttribute WatchUpdateRequest request,
+            @RequestPart(value = "imageFile", required = false) MultipartFile imageFile
+    ) {
         UserPrincipal user = SecurityUtils.getCurrentUser();
-        return ResponseEntity.ok(watchService.updateWatch(id, request, user.getId(), user.getRole()));
+        return ResponseEntity.ok(
+                watchService.updateWatch(id, request, imageFile, user.getId(), user.getRole())
+        );
     }
 
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "JSON body with delta field: positive to increase, negative to decrease",
-            content = @Content(schema = @Schema(example = "{\"delta\": 5}"))
-    )
-    @org.springframework.web.bind.annotation.PatchMapping("/{id}/stock")
+    @PatchMapping("/{id}/stock")
     @PreAuthorize("hasRole('SELLER')")
     @Operation(summary = "Adjust stock quantity for seller's own watch (+N to add, -N to subtract)")
     public ResponseEntity<WatchResponse> adjustStock(
             @PathVariable Long id,
-            @RequestBody java.util.Map<String, Integer> body) {
+            @RequestBody Map<String, Integer> body
+    ) {
         UserPrincipal user = SecurityUtils.getCurrentUser();
         int delta = body.getOrDefault("delta", 0);
         return ResponseEntity.ok(watchService.adjustStock(id, delta, user.getId()));

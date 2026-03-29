@@ -38,11 +38,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class WatchService {
+
     private final WatchRepository watchRepository;
     private final UserAccountRepository userAccountRepository;
     private final OrderRepository orderRepository;
@@ -50,13 +52,20 @@ public class WatchService {
     private final CartItemRepository cartItemRepository;
     private final WishlistItemRepository wishlistItemRepository;
     private final ReviewRepository reviewRepository;
+    private final FileStorageService fileStorageService;
 
     @Transactional
-    public WatchResponse createWatch(WatchCreateRequest req, Long sellerId) {
+    public WatchResponse createWatch(WatchCreateRequest req, MultipartFile imageFile, Long sellerId) {
         UserAccount seller = userAccountRepository.findById(sellerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
+
         if (seller.getRole() != Role.SELLER) {
             throw new ForbiddenException("Only sellers can create watch listings");
+        }
+
+        String resolvedImageUrl = blankToNull(req.getImageUrl());
+        if (imageFile != null && !imageFile.isEmpty()) {
+            resolvedImageUrl = fileStorageService.storeWatchImage(imageFile);
         }
 
         Watch watch = Watch.builder()
@@ -69,10 +78,11 @@ public class WatchService {
                 .price(req.getPrice())
                 .stockQuantity(req.getStockQuantity() == null || req.getStockQuantity() < 1 ? 1 : req.getStockQuantity())
                 .status(WatchStatus.PENDING_REVIEW)
-                .imageUrl(blankToNull(req.getImageUrl()))
+                .imageUrl(resolvedImageUrl)
                 .referenceNumber(blankToNull(req.getReferenceNumber()))
                 .year(req.getYear())
                 .build();
+
         return toResponse(watchRepository.save(watch));
     }
 
@@ -184,7 +194,7 @@ public class WatchService {
     }
 
     @Transactional
-    public WatchResponse updateWatch(Long watchId, WatchUpdateRequest req, Long currentUserId, Role currentRole) {
+    public WatchResponse updateWatch(Long watchId, WatchUpdateRequest req, MultipartFile imageFile, Long currentUserId, Role currentRole) {
         Watch watch = watchRepository.findById(watchId)
                 .orElseThrow(() -> new ResourceNotFoundException("Watch not found"));
 
@@ -220,7 +230,9 @@ public class WatchService {
                 watch.setStatus(WatchStatus.INACTIVE);
             }
         }
-        if (req.getImageUrl() != null) {
+        if (imageFile != null && !imageFile.isEmpty()) {
+            watch.setImageUrl(fileStorageService.storeWatchImage(imageFile));
+        } else if (req.getImageUrl() != null) {
             watch.setImageUrl(blankToNull(req.getImageUrl()));
         }
         if (req.getReferenceNumber() != null) {
@@ -233,6 +245,7 @@ public class WatchService {
         if (currentRole == Role.SELLER) {
             watch.setStatus(WatchStatus.PENDING_REVIEW);
         }
+
         return toResponse(watchRepository.save(watch));
     }
 
@@ -288,24 +301,28 @@ public class WatchService {
         return toResponse(watchRepository.save(watch));
     }
 
-    /**
-     * Seller-accessible stock adjustment. delta = +N or -N.
-     * Stock can never go below 0.
-     */
     @Transactional
     public WatchResponse adjustStock(Long watchId, int delta, Long sellerId) {
         Watch watch = watchRepository.findLockedById(watchId)
                 .orElseThrow(() -> new ResourceNotFoundException("Watch not found"));
-        if (!watch.getSeller().getId().equals(sellerId))
+
+        if (!watch.getSeller().getId().equals(sellerId)) {
             throw new ForbiddenException("You can only adjust stock for your own watches");
+        }
+
         int current = watch.getStockQuantity() == null ? 0 : watch.getStockQuantity();
         int updated = current + delta;
-        if (updated < 0) throw new BadRequestException("Stock cannot go below 0");
+
+        if (updated < 0) {
+            throw new BadRequestException("Stock cannot go below 0");
+        }
+
         watch.setStockQuantity(updated);
-        // Auto-manage status based on stock threshold
+
         if (updated >= OrderService.STOCK_THRESHOLD && watch.getStatus() == WatchStatus.INACTIVE) {
             watch.setStatus(WatchStatus.ACTIVE);
         }
+
         return toResponse(watchRepository.save(watch));
     }
 
@@ -376,7 +393,10 @@ public class WatchService {
         if (conditions == null || conditions.isEmpty()) {
             return null;
         }
-        return conditions.stream().filter(Objects::nonNull).map(this::parseCondition).toList();
+        return conditions.stream()
+                .filter(Objects::nonNull)
+                .map(this::parseCondition)
+                .toList();
     }
 
     private List<String> normalizeList(List<String> values) {
@@ -418,6 +438,7 @@ public class WatchService {
     private WatchResponse toResponse(Watch watch) {
         double averageRating = calculateAverageRating(watch);
         int reviewCount = watch.getReviews() == null ? 0 : watch.getReviews().size();
+
         return WatchResponse.builder()
                 .id(watch.getId())
                 .sellerId(watch.getSeller().getId())
@@ -444,6 +465,8 @@ public class WatchService {
         if (watch.getReviews() == null || watch.getReviews().isEmpty()) {
             return 0.0;
         }
-        return Math.round(watch.getReviews().stream().mapToInt(r -> r.getRating()).average().orElse(0.0) * 10.0) / 10.0;
+        return Math.round(
+                watch.getReviews().stream().mapToInt(r -> r.getRating()).average().orElse(0.0) * 10.0
+        ) / 10.0;
     }
 }
