@@ -14,8 +14,9 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#timelessNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="timelessNavbar">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center">
                 <li class="nav-item" sec:authorize="!isAuthenticated() or hasRole('BUYER')">
                     <a class="nav-link" th:href="@{/watches}">Browse Watches</a>
                 </li>
@@ -53,7 +54,8 @@
                     <a class="nav-link" th:href="@{/admin/dashboard}">Admin Dashboard</a>
                 </li>
             </ul>
-            <div class="d-flex align-items-center gap-3">
+
+            <div class="d-flex align-items-center gap-3 flex-wrap justify-content-lg-end">
                 <span class="navbar-text" sec:authorize="isAuthenticated()">
                     Signed in as
                     <strong th:text="${currentUser != null ? currentUser.account.fullName : 'User'}">User</strong>
@@ -68,6 +70,9 @@
 <th:block th:fragment="footerScripts">
     <footer class="footer-timeless text-center">
         <div class="container">
+            <div class="mb-3">
+                <span class="listing-kicker">Collector marketplace</span>
+            </div>
             <p class="mb-1 fw-semibold">Timeless Luxury Watch Marketplace</p>
             <p class="mb-0 small">Curated resale. Trusted sellers. Elegant buying experience.</p>
         </div>

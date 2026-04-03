@@ -5,21 +5,28 @@
 <div th:replace="~{layout/base :: navbar}"></div>
 
 <main class="container py-5 main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <a th:href="@{/buyer/orders}" class="btn btn-sm btn-timeless-outline mb-2">← My Orders</a>
-            <h1 class="fw-bold mb-1" th:text="${'Order #' + order.id}">Order #1</h1>
-            <p class="text-muted mb-0"
-               th:text="${'Placed on ' + #temporals.format(order.createdAt, 'dd MMM yyyy, HH:mm')}">Placed on…</p>
+    <section class="page-hero compact mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-0 flex-wrap gap-3">
+            <div>
+                <a th:href="@{/buyer/orders}" class="btn btn-sm btn-timeless-outline mb-3">← My Orders</a>
+                <span class="listing-kicker">Order archive</span>
+                <h1 class="watches-title mb-1" th:text="${'Order #' + order.id}">Order #1</h1>
+                <p class="text-muted mb-0"
+                   th:text="${'Placed on ' + #temporals.format(order.createdAt, 'dd MMM yyyy, HH:mm')}">Placed on…</p>
+            </div>
+            <span class="badge-status" th:classappend="${' ' + order.status}" th:text="${order.status}">PENDING</span>
         </div>
-        <span class="badge-status" th:classappend="${' ' + order.status}" th:text="${order.status}">PENDING</span>
-    </div>
+    </section>
 
-    <!-- ═══ ORDER TIMELINE ═══ -->
     <div class="timeless-panel p-4 mb-4">
-        <h5 class="fw-bold mb-4">Order Progress</h5>
-        <div class="order-timeline">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <p class="editorial-kicker mb-1">Fulfillment</p>
+                <h5 class="fw-bold mb-0">Order Progress</h5>
+            </div>
+        </div>
 
+        <div class="order-timeline">
             <th:block th:with="
         allSteps=${ {'PENDING','CONFIRMED','PROCESSING','SHIPPED','DELIVERED','COMPLETED'} },
         cancelled=${order.status == 'CANCELLED'},
@@ -33,7 +40,6 @@
         }
       ">
 
-                <!-- Special: CANCELLED -->
                 <div th:if="${cancelled}" class="timeline-cancelled-banner">
                     <span class="timeline-cancelled-icon">✕</span>
                     <div>
@@ -42,10 +48,8 @@
                     </div>
                 </div>
 
-                <!-- Normal flow steps -->
                 <div th:if="${!cancelled}" class="timeline-steps">
 
-                    <!-- PENDING -->
                     <div class="timeline-step" th:classappend="${currentOrdinal >= 0} ? ' done' : ''">
                         <div class="timeline-circle" th:classappend="${currentOrdinal >= 0} ? ' done' : (${currentOrdinal == -1} ? '' : '')">
                             <span th:if="${currentOrdinal > 0}">✓</span>
@@ -59,7 +63,6 @@
                         </div>
                     </div>
 
-                    <!-- CONFIRMED -->
                     <div class="timeline-step" th:classappend="${currentOrdinal >= 1} ? ' done' : ''">
                         <div class="timeline-circle" th:classappend="${currentOrdinal >= 1} ? ' done' : ''">
                             <span th:if="${currentOrdinal > 1}">✓</span>
@@ -73,7 +76,6 @@
                         </div>
                     </div>
 
-                    <!-- PROCESSING -->
                     <div class="timeline-step" th:classappend="${currentOrdinal >= 2} ? ' done' : ''">
                         <div class="timeline-circle" th:classappend="${currentOrdinal >= 2} ? ' done' : ''">
                             <span th:if="${currentOrdinal > 2}">✓</span>
@@ -87,7 +89,6 @@
                         </div>
                     </div>
 
-                    <!-- SHIPPED -->
                     <div class="timeline-step" th:classappend="${currentOrdinal >= 3} ? ' done' : ''">
                         <div class="timeline-circle" th:classappend="${currentOrdinal >= 3} ? ' done' : ''">
                             <span th:if="${currentOrdinal > 3}">✓</span>
@@ -101,7 +102,6 @@
                         </div>
                     </div>
 
-                    <!-- DELIVERED -->
                     <div class="timeline-step" th:classappend="${currentOrdinal >= 4} ? ' done' : ''">
                         <div class="timeline-circle" th:classappend="${currentOrdinal >= 4} ? ' done' : ''">
                             <span th:if="${currentOrdinal > 4}">✓</span>
@@ -115,7 +115,6 @@
                         </div>
                     </div>
 
-                    <!-- COMPLETED -->
                     <div class="timeline-step" th:classappend="${currentOrdinal >= 5} ? ' done' : ''">
                         <div class="timeline-circle" th:classappend="${currentOrdinal >= 5} ? ' done last' : ''">
                             <span th:if="${currentOrdinal >= 5}">✓</span>
@@ -127,34 +126,46 @@
                         </div>
                     </div>
 
-                </div><!-- /timeline-steps -->
+                </div>
             </th:block>
         </div>
     </div>
-    <!-- ═══ END TIMELINE ═══ -->
 
     <div class="row g-4">
-        <!-- Watch info -->
         <div class="col-lg-7">
             <div class="timeless-panel p-4">
-                <div class="d-flex gap-4 flex-wrap">
-                    <img class="watch-detail-image" style="max-width:240px;min-height:200px;"
-                         th:src="${watch.imageUrl != null ? watch.imageUrl : 'https://via.placeholder.com/800x600?text=Timeless'}"
-                         alt="Watch image">
-                    <div class="flex-grow-1">
-                        <p class="text-muted mb-1" th:text="${order.watchBrand}">Brand</p>
+                <div class="row g-4 align-items-start">
+                    <div class="col-md-auto">
+                        <div class="watch-image-frame timeless-panel p-3">
+                            <img class="watch-detail-image" style="max-width:240px;min-height:200px;"
+                                 th:src="${watch.imageUrl != null ? watch.imageUrl : 'https://via.placeholder.com/800x600?text=Timeless'}"
+                                 alt="Watch image">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <p class="editorial-kicker mb-2" th:text="${order.watchBrand}">Brand</p>
                         <h2 class="fw-bold mb-2" th:text="${order.watchName}">Watch</h2>
-                        <div class="mb-1"><small class="text-muted">Quantity ordered:</small>
-                            <strong th:text="${order.quantity}">1</strong></div>
+                        <div class="detail-spec-grid mb-4">
+                            <div class="detail-spec">
+                                <small>Quantity ordered</small>
+                                <strong th:text="${order.quantity}">1</strong>
+                            </div>
+                            <div class="detail-spec">
+                                <small>Seller</small>
+                                <strong th:text="${order.sellerName}">Seller</strong>
+                            </div>
+                            <div class="detail-spec" th:if="${order.paymentMethod != null}">
+                                <small>Paid via</small>
+                                <span class="badge-condition" th:text="${order.paymentMethod}">METHOD</span>
+                            </div>
+                            <div class="detail-spec" th:if="${order.trackingNumber != null}">
+                                <small>Tracking</small>
+                                <strong><code th:text="${order.trackingNumber}">TRK123</code></strong>
+                            </div>
+                        </div>
+
                         <div class="price-text mb-3"
                              th:text="${'৳' + #numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">৳0</div>
-                        <p class="mb-1"><strong>Seller:</strong> <span th:text="${order.sellerName}">Seller</span></p>
-                        <p class="mb-1" th:if="${order.paymentMethod != null}">
-                            <strong>Paid via:</strong>
-                            <span class="badge-condition" th:text="${order.paymentMethod}">METHOD</span>
-                        </p>
-                        <p class="mb-3" th:if="${order.trackingNumber != null}">
-                            <strong>Tracking:</strong> <code th:text="${order.trackingNumber}">TRK123</code></p>
 
                         <div class="d-flex gap-2 flex-wrap mt-3">
                             <button class="btn btn-success"
@@ -176,9 +187,9 @@
             </div>
         </div>
 
-        <!-- Review -->
         <div class="col-lg-5" th:if="${canReview}">
             <div class="timeless-panel p-4">
+                <p class="editorial-kicker mb-2">Collector feedback</p>
                 <h4 class="fw-bold mb-3">Leave a Review</h4>
                 <form id="buyerOrderReviewForm">
                     <div class="mb-3">

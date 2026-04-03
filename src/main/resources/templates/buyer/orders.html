@@ -5,10 +5,13 @@
 <div th:replace="~{layout/base :: navbar}"></div>
 
 <main class="container py-5 main-content">
-    <div class="mb-4">
-        <h1 class="fw-bold mb-1">My Orders</h1>
-        <p class="text-muted mb-0">Track all your purchases in one place.</p>
-    </div>
+    <section class="page-hero compact mb-4">
+        <div class="mb-0">
+            <span class="listing-kicker">Purchase archive</span>
+            <h1 class="watches-title mb-1">My Orders</h1>
+            <p class="text-muted mb-0">Track all your purchases in one place.</p>
+        </div>
+    </section>
 
     <div th:if="${orders.isEmpty()}" class="empty-state">
         <h4 class="fw-bold">No orders yet</h4>
@@ -20,25 +23,26 @@
         <div th:each="order : ${orders}" class="timeless-panel p-4">
             <div class="row g-3 align-items-start">
 
-                <!-- Watch thumb -->
                 <div class="col-auto">
                     <a th:href="@{/buyer/orders/{id}(id=${order.id})}">
                         <img th:src="${order.watchImageUrl != null ? order.watchImageUrl : 'https://via.placeholder.com/100?text=⌚'}"
-                             alt="watch" style="width:80px;height:80px;object-fit:cover;border-radius:10px;">
+                             alt="watch" style="width:80px;height:80px;object-fit:cover;border-radius:16px;">
                     </a>
                 </div>
 
-                <!-- Info -->
                 <div class="col">
-                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-1">
-                        <a th:href="@{/buyer/orders/{id}(id=${order.id})}" class="fw-bold text-decoration-none"
-                           th:text="${order.watchName}">Watch Name</a>
+                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
+                        <div>
+                            <p class="editorial-kicker mb-1">Order detail</p>
+                            <a th:href="@{/buyer/orders/{id}(id=${order.id})}" class="fw-bold text-decoration-none"
+                               th:text="${order.watchName}">Watch Name</a>
+                        </div>
                         <span class="badge-status" th:classappend="${' ' + order.status}" th:text="${order.status}">STATUS</span>
                     </div>
+
                     <div class="text-muted small mb-2" th:text="${order.watchBrand + ' • Qty: ' + order.quantity}">Brand • Qty</div>
 
-                    <!-- Mini timeline -->
-                    <div class="mini-timeline mb-2"
+                    <div class="mini-timeline mb-3"
                          th:with="cancelled=${order.status == 'CANCELLED'},
                         cur=${order.status == 'PENDING' ? 0 : order.status == 'CONFIRMED' ? 1 : order.status == 'PROCESSING' ? 2 : order.status == 'SHIPPED' ? 3 : order.status == 'DELIVERED' ? 4 : order.status == 'COMPLETED' ? 5 : -1}">
 
@@ -57,8 +61,8 @@
                     </div>
 
                     <div class="d-flex gap-3 flex-wrap align-items-center">
-            <span class="fw-bold price-text" style="font-size:1rem;"
-                  th:text="${'৳' + #numbers.formatDecimal(order.totalAmount,1,'COMMA',2,'POINT')}">৳0</span>
+                        <span class="fw-bold price-text" style="font-size:1rem;"
+                              th:text="${'৳' + #numbers.formatDecimal(order.totalAmount,1,'COMMA',2,'POINT')}">৳0</span>
                         <span class="text-muted small"
                               th:text="${#temporals.format(order.createdAt,'dd MMM yyyy')}">Date</span>
                         <span th:if="${order.paymentMethod != null}" class="text-muted small"

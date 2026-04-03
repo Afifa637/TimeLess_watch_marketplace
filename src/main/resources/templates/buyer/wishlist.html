@@ -5,12 +5,15 @@
 <div th:replace="~{layout/base :: navbar}"></div>
 
 <main class="container py-5 main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="wishlist-header">
-            <h1 class="fw-bold mb-1">My Wishlist</h1>
-            <p class="text-muted mb-0">Keep track of watches you may want to purchase later.</p>
+    <section class="page-hero compact mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-0 flex-wrap gap-3">
+            <div class="wishlist-header">
+                <span class="listing-kicker">Collector shortlist</span>
+                <h1 class="watches-title mb-1">My Wishlist</h1>
+                <p class="text-muted mb-0">Keep track of watches you may want to purchase later.</p>
+            </div>
         </div>
-    </div>
+    </section>
 
     <div th:if="${wishlistItems.isEmpty()}" class="empty-state">
         <h4 class="fw-bold">Nothing in your wishlist yet</h4>
@@ -22,6 +25,7 @@
         <div class="watch-card" th:each="item : ${wishlistItems}">
             <img class="watch-card-image" th:src="${item.watchImageUrl != null ? item.watchImageUrl : 'https://via.placeholder.com/800x600?text=Timeless'}" alt="Watch image">
             <div class="p-4">
+                <p class="editorial-kicker mb-2">Saved piece</p>
                 <h5 class="fw-bold mb-1" th:text="${item.watchName}">Watch</h5>
                 <p class="text-muted mb-2" th:text="${item.watchBrand}">Brand</p>
                 <span class="badge-status" th:classappend="${' ' + item.watchStatus}" th:text="${item.watchStatus}">ACTIVE</span>

@@ -5,13 +5,24 @@
 <div th:replace="~{layout/base :: navbar}"></div>
 
 <main class="container py-5 main-content">
-    <div class="row justify-content-center">
-        <div class="col-xl-9">
+    <section class="page-hero compact mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <span class="listing-kicker">Seller atelier</span>
+                <h1 class="watches-title mb-1">Edit Listing</h1>
+                <p class="text-muted mb-0">Refine presentation, adjust inventory, and resubmit the listing with the same underlying workflow.</p>
+            </div>
+            <span class="badge-status" th:classappend="${' ' + watch.status}" th:text="${watch.status}">PENDING_REVIEW</span>
+        </div>
+    </section>
 
-            <!-- ── Stock Management Card (ACTIVE watches only) ── -->
+    <div class="row justify-content-center">
+        <div class="col-xl-10">
+
             <div class="timeless-panel p-4 mb-4" th:if="${watch.status == 'ACTIVE'}">
                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                     <div>
+                        <p class="editorial-kicker mb-1">Inventory control</p>
                         <h5 class="fw-bold mb-0">Stock Management</h5>
                         <p class="text-muted small mb-0">Adjust live inventory without re-submitting for review.</p>
                     </div>
@@ -26,10 +37,10 @@
                     </span>
                 </div>
 
-                <div class="d-flex align-items-center gap-4 flex-wrap">
-                    <div>
-                        <label class="form-label fw-semibold mb-1">Quick Adjust Quantity</label>
-                        <div class="d-flex align-items-center gap-3">
+                <div class="row g-4 align-items-end">
+                    <div class="col-lg-5">
+                        <label class="form-label fw-semibold mb-2">Quick Adjust Quantity</label>
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
                             <div class="qty-stepper">
                                 <button type="button" class="qty-btn"
                                         th:onclick="|adjustStock(${watch.id}, -1)|"
@@ -44,8 +55,8 @@
                         </div>
                     </div>
 
-                    <div class="flex-grow-1" style="max-width:280px;">
-                        <label class="form-label fw-semibold mb-1">Set Exact Quantity</label>
+                    <div class="col-lg-4">
+                        <label class="form-label fw-semibold mb-2">Set Exact Quantity</label>
                         <div class="input-group">
                             <input type="number" id="exactStockInput" class="form-control"
                                    min="0" step="1" th:value="${watch.stockQuantity}"
@@ -54,26 +65,43 @@
                                     th:onclick="|setExactStock(${watch.id})|">Set</button>
                         </div>
                     </div>
-                </div>
 
-                <div class="mt-3 small text-muted">
-                    ⚠ Stock &lt; 3 will mark this product as <strong>Stock Out</strong> — buyers cannot purchase until restocked.
+                    <div class="col-lg-3">
+                        <div class="stat-card h-100">
+                            <p class="editorial-kicker mb-2">Notice</p>
+                            <p class="text-muted small mb-0">Stock below 3 will mark the watch as <strong>Stock Out</strong> until replenished.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- ── Edit Form ── -->
             <div class="timeless-panel p-4 p-lg-5">
-                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                    <div>
-                        <h1 class="fw-bold mb-1">Edit Listing</h1>
-                        <p class="text-muted mb-0">Updating details will send the listing back to admin review.</p>
+                <div class="row g-4 align-items-start mb-4">
+                    <div class="col-lg-8">
+                        <div>
+                            <p class="editorial-kicker mb-1">Listing refinement</p>
+                            <h2 class="fw-bold mb-1">Edit Watch Details</h2>
+                            <p class="text-muted mb-0">Updating details will send the listing back to admin review.</p>
+                        </div>
                     </div>
-                    <span class="badge-status" th:classappend="${' ' + watch.status}"
-                          th:text="${watch.status}">PENDING_REVIEW</span>
+                    <div class="col-lg-4" th:if="${watch.imageUrl != null}">
+                        <label class="form-label">Current Image</label>
+                        <div class="watch-image-frame timeless-panel p-3">
+                            <img th:src="${watch.imageUrl}"
+                                 alt="Current watch image"
+                                 class="watch-detail-image"
+                                 style="min-height: 220px; max-height: 280px;">
+                        </div>
+                    </div>
                 </div>
 
                 <form id="editWatchForm" class="needs-validation" novalidate enctype="multipart/form-data">
-                    <div class="row g-3">
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <p class="editorial-kicker mb-1">Watch profile</p>
+                            <h4 class="fw-bold mb-0">Core Details</h4>
+                        </div>
+
                         <div class="col-md-6">
                             <label class="form-label">Name</label>
                             <input type="text" name="name" class="form-control" required
@@ -132,19 +160,15 @@
                                    th:value="${watch.referenceNumber}">
                         </div>
 
+                        <div class="col-12 mt-2">
+                            <p class="editorial-kicker mb-1">Showcase</p>
+                            <h4 class="fw-bold mb-0">Media & Narrative</h4>
+                        </div>
+
                         <div class="col-12">
                             <label class="form-label">Replace Watch Image</label>
                             <input type="file" name="imageFile" class="form-control" accept=".jpg,.jpeg,.png,.webp">
                             <div class="form-text">Leave empty to keep the current image.</div>
-                        </div>
-
-                        <div class="col-12" th:if="${watch.imageUrl != null}">
-                            <label class="form-label">Current Image</label>
-                            <div>
-                                <img th:src="${watch.imageUrl}"
-                                     alt="Current watch image"
-                                     style="max-width: 220px; border-radius: 12px;">
-                            </div>
                         </div>
 
                         <div class="col-12">
@@ -154,10 +178,10 @@
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
+                    <div class="d-flex justify-content-between align-items-center mt-5 flex-wrap gap-2">
                         <button class="btn btn-timeless-danger" type="button"
                                 th:onclick="|deleteWatch(${watch.id})|">Delete Listing</button>
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 flex-wrap">
                             <a class="btn btn-timeless-outline" th:href="@{/seller/dashboard}">Cancel</a>
                             <button class="btn btn-timeless-primary" type="submit">Save Changes</button>
                         </div>

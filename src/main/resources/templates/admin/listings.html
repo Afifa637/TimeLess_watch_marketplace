@@ -5,21 +5,33 @@
 <div th:replace="~{layout/base :: navbar}"></div>
 
 <main class="container py-5 main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <div>
-            <h1 class="fw-bold mb-1">Listing Management</h1>
-            <p class="text-muted mb-0">Approve, reject, deactivate, or remove marketplace listings.</p>
+    <section class="page-hero compact mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-0 flex-wrap gap-3">
+            <div>
+                <span class="listing-kicker">Marketplace inventory</span>
+                <h1 class="watches-title mb-1">Listing Management</h1>
+                <p class="text-muted mb-0">Approve, reject, deactivate, or remove marketplace listings.</p>
+            </div>
         </div>
-        <div class="nav nav-pills gap-2">
-            <a class="btn" th:classappend="${selectedStatus == 'ALL'} ? ' btn-timeless-primary' : ' btn-timeless-outline'" th:href="@{/admin/listings(status='ALL')}">All</a>
-            <a class="btn" th:classappend="${selectedStatus == 'PENDING_REVIEW'} ? ' btn-timeless-primary' : ' btn-timeless-outline'" th:href="@{/admin/listings(status='PENDING_REVIEW')}">Pending Review</a>
-            <a class="btn" th:classappend="${selectedStatus == 'ACTIVE'} ? ' btn-timeless-primary' : ' btn-timeless-outline'" th:href="@{/admin/listings(status='ACTIVE')}">Active</a>
-            <a class="btn" th:classappend="${selectedStatus == 'INACTIVE'} ? ' btn-timeless-primary' : ' btn-timeless-outline'" th:href="@{/admin/listings(status='INACTIVE')}">Inactive</a>
-            <a class="btn" th:classappend="${selectedStatus == 'REJECTED'} ? ' btn-timeless-primary' : ' btn-timeless-outline'" th:href="@{/admin/listings(status='REJECTED')}">Rejected</a>
-        </div>
+    </section>
+
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a class="btn" th:classappend="${selectedStatus == 'ALL'} ? ' btn-timeless-primary' : ' btn-timeless-outline'" th:href="@{/admin/listings(status='ALL')}">All</a>
+        <a class="btn" th:classappend="${selectedStatus == 'PENDING_REVIEW'} ? ' btn-timeless-primary' : ' btn-timeless-outline'" th:href="@{/admin/listings(status='PENDING_REVIEW')}">Pending Review</a>
+        <a class="btn" th:classappend="${selectedStatus == 'ACTIVE'} ? ' btn-timeless-primary' : ' btn-timeless-outline'" th:href="@{/admin/listings(status='ACTIVE')}">Active</a>
+        <a class="btn" th:classappend="${selectedStatus == 'INACTIVE'} ? ' btn-timeless-primary' : ' btn-timeless-outline'" th:href="@{/admin/listings(status='INACTIVE')}">Inactive</a>
+        <a class="btn" th:classappend="${selectedStatus == 'REJECTED'} ? ' btn-timeless-primary' : ' btn-timeless-outline'" th:href="@{/admin/listings(status='REJECTED')}">Rejected</a>
     </div>
 
     <div class="timeless-panel p-3 p-lg-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+                <p class="editorial-kicker mb-1">Admin actions</p>
+                <h4 class="fw-bold mb-0">Listings Overview</h4>
+            </div>
+            <span class="badge-status ACTIVE" th:text="${selectedStatus}">ALL</span>
+        </div>
+
         <div class="table-responsive">
             <table class="table-timeless">
                 <thead>
