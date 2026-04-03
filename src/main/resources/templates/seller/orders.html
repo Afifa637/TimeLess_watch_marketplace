@@ -5,12 +5,15 @@
 <div th:replace="~{layout/base :: navbar}"></div>
 
 <main class="container py-5 main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <h1 class="fw-bold mb-1">Seller Orders</h1>
-            <p class="text-muted mb-0">Advance paid orders through your fulfillment workflow.</p>
+    <section class="page-hero compact mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-0 flex-wrap gap-3">
+            <div>
+                <span class="listing-kicker">Fulfillment desk</span>
+                <h1 class="watches-title mb-1">Seller Orders</h1>
+                <p class="text-muted mb-0">Advance paid orders through your fulfillment workflow with a more premium operational view.</p>
+            </div>
         </div>
-    </div>
+    </section>
 
     <div th:if="${orders.isEmpty()}" class="empty-state">
         <h4 class="fw-bold">No seller orders yet</h4>
@@ -18,6 +21,13 @@
     </div>
 
     <div th:if="${!orders.isEmpty()}" class="timeless-panel p-3 p-lg-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+                <p class="editorial-kicker mb-1">Order queue</p>
+                <h4 class="fw-bold mb-0">Incoming Fulfillment</h4>
+            </div>
+        </div>
+
         <div class="table-responsive">
             <table class="table-timeless">
                 <thead>

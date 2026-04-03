@@ -7,14 +7,20 @@
 <main class="container py-5 main-content">
     <div class="row g-4 align-items-start">
         <div class="col-lg-6">
-            <img class="watch-detail-image" th:src="${watch.imageUrl != null ? watch.imageUrl : 'https://via.placeholder.com/1000x800?text=Timeless'}" alt="Watch image">
+            <div class="watch-image-frame timeless-panel p-3 p-lg-4">
+                <img class="watch-detail-image" th:src="${watch.imageUrl != null ? watch.imageUrl : 'https://via.placeholder.com/1000x800?text=Timeless'}" alt="Watch image">
+                <div class="image-caption mt-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span class="editorial-kicker" th:text="${watch.brand + ' • ' + watch.category}">Brand • Category</span>
+                    <span class="text-muted small">Collector presentation</span>
+                </div>
+            </div>
         </div>
         <div class="col-lg-6">
             <div class="timeless-panel p-4 p-lg-5">
                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
                     <div>
-                        <p class="text-muted mb-1" th:text="${watch.brand + ' • ' + watch.category}">Brand • Category</p>
-                        <h1 class="fw-bold mb-2" th:text="${watch.name}">Watch Name</h1>
+                        <p class="editorial-kicker mb-2" th:text="${watch.brand + ' • ' + watch.category}">Brand • Category</p>
+                        <h1 class="fw-bold mb-2 detail-title" th:text="${watch.name}">Watch Name</h1>
                         <div class="rating-display">
                             <div class="star-rating">
                                 <span th:each="i : ${#numbers.sequence(1,5)}" th:text="'★'" th:classappend="${i <= T(java.lang.Math).round(watch.averageRating)} ? ' filled' : ''">★</span>
@@ -27,67 +33,57 @@
 
                 <div class="price-text mb-4" th:text="${'৳' + #numbers.formatDecimal(watch.price, 1, 'COMMA', 2, 'POINT')}">$14,500.00</div>
 
-                <div class="row row-cols-2 g-3 mb-4">
-                    <div>
-                        <small class="text-muted d-block">Seller</small>
+                <div class="detail-spec-grid mb-4">
+                    <div class="detail-spec">
+                        <small>Seller</small>
                         <strong th:text="${watch.sellerName}">Seller Name</strong>
                     </div>
-                    <div>
-                        <small class="text-muted d-block">Reference</small>
+                    <div class="detail-spec">
+                        <small>Reference</small>
                         <strong th:text="${watch.referenceNumber != null ? watch.referenceNumber : 'N/A'}">Ref</strong>
                     </div>
-                    <div>
-                        <small class="text-muted d-block">Year</small>
+                    <div class="detail-spec">
+                        <small>Year</small>
                         <strong th:text="${watch.year != null ? watch.year : 'N/A'}">2024</strong>
                     </div>
-                    <div>
-                        <small class="text-muted d-block">Status</small>
+                    <div class="detail-spec">
+                        <small>Status</small>
                         <span class="badge-status" th:classappend="${' ' + watch.status}" th:text="${watch.status}">ACTIVE</span>
                     </div>
                 </div>
 
-                <!-- Stock availability badge -->
-                <div class="mb-3"
-                     th:with="threshold=3">
-                  <span th:if="${watch.stockQuantity != null and watch.stockQuantity >= threshold}"
-                        class="stock-badge in-stock">
-                    ✓ In Stock (<span th:text="${watch.stockQuantity}">5</span> available)
+                <div class="mb-3" th:with="threshold=3">
+                  <span th:if="${watch.stockQuantity != null and watch.stockQuantity >= threshold}" class="stock-badge in-stock">
+                    ✓ In Stock
                   </span>
-                    <span th:if="${watch.stockQuantity == null or watch.stockQuantity < threshold}"
-                          class="stock-badge out-of-stock">
+                    <span th:if="${watch.stockQuantity == null or watch.stockQuantity < threshold}" class="stock-badge out-of-stock">
                     ✗ Stock Out
                   </span>
                 </div>
 
-                <p class="text-muted mb-4" th:text="${watch.description != null ? watch.description : 'No description provided.'}">Description</p>
+                <div class="description-panel mb-4">
+                    <p class="text-muted mb-0" th:text="${watch.description != null ? watch.description : 'No description provided.'}">Description</p>
+                </div>
 
-                <!-- BUYER: qty stepper + add to cart -->
-                <div th:if="${currentRole == 'BUYER' and watch.status == 'ACTIVE' and watch.stockQuantity != null and watch.stockQuantity >= 3}"
-                     class="mb-4">
-                    <div class="d-flex align-items-center gap-3 mb-3">
+                <div th:if="${currentRole == 'BUYER' and watch.status == 'ACTIVE' and watch.stockQuantity != null and watch.stockQuantity >= 3}" class="mb-4">
+                    <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
                         <div class="qty-stepper">
                             <button class="qty-btn" onclick="detailQty(-1)">−</button>
                             <span class="qty-value" id="detailQtyVal">1</span>
                             <button class="qty-btn" onclick="detailQty(1)">+</button>
                         </div>
-                        <input type="hidden" id="detailMaxStock"
-                               th:value="${watch.stockQuantity}">
+                        <input type="hidden" id="detailMaxStock" th:value="${watch.stockQuantity}">
                         <span class="text-muted small">max <span th:text="${watch.stockQuantity}">5</span></span>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
-                        <button class="btn btn-timeless-primary"
-                                th:onclick="|addToCartQty(${watch.id}, ${watch.stockQuantity})|">Add to Cart</button>
-                        <button class="btn btn-classic-outline"
-                                th:onclick="|addToWishlist(${watch.id})|">Add to Wishlist</button>
+                        <button class="btn btn-timeless-primary" th:onclick="|addToCartQty(${watch.id}, ${watch.stockQuantity})|">Add to Cart</button>
+                        <button class="btn btn-classic-outline" th:onclick="|addToWishlist(${watch.id})|">Add to Wishlist</button>
                     </div>
                 </div>
 
-                <!-- BUYER: out of stock -->
-                <div th:if="${currentRole == 'BUYER' and (watch.status != 'ACTIVE' or watch.stockQuantity == null or watch.stockQuantity < 3)}"
-                     class="mb-4">
+                <div th:if="${currentRole == 'BUYER' and (watch.status != 'ACTIVE' or watch.stockQuantity == null or watch.stockQuantity < 3)}" class="mb-4">
                     <div class="alert alert-warning py-2 mb-2">This product is currently unavailable.</div>
-                    <button class="btn btn-classic-outline"
-                            th:onclick="|addToWishlist(${watch.id})|">Add to Wishlist</button>
+                    <button class="btn btn-classic-outline" th:onclick="|addToWishlist(${watch.id})|">Add to Wishlist</button>
                 </div>
 
                 <div class="d-flex flex-wrap gap-2 mb-4" th:if="${!isAuthenticated or (currentRole != 'BUYER')}">
@@ -105,7 +101,7 @@
 
     <section class="row g-4 mt-1">
         <div class="col-lg-8">
-            <div class="timeless-panel p-4">
+            <div class="timeless-panel p-4 review-shell">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h3 class="fw-bold mb-0">Reviews</h3>
                     <span class="text-muted" th:text="${reviews.size()} + ' total'">0 total</span>
@@ -131,6 +127,7 @@
         </div>
         <div class="col-lg-4" th:if="${canReview}">
             <div class="timeless-panel p-4">
+                <p class="editorial-kicker mb-2">Collector feedback</p>
                 <h4 class="fw-bold mb-3">Leave a Review</h4>
                 <form id="reviewForm">
                     <div class="mb-3">
@@ -162,7 +159,6 @@
     });
 </script>
 <script>
-    // Initialise detail qty stepper
     _detailQty = 1;
     const _qtyEl = document.getElementById('detailQtyVal');
     if (_qtyEl) _qtyEl.textContent = '1';

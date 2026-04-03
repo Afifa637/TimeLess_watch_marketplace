@@ -5,28 +5,67 @@
 <div th:replace="~{layout/base :: navbar}"></div>
 
 <main class="container py-5 main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <h1 class="fw-bold mb-1">Admin Dashboard</h1>
-            <p class="text-muted mb-0">Marketplace oversight across users, listings, orders, and revenue.</p>
+    <section class="page-hero compact mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-0 flex-wrap gap-3">
+            <div>
+                <span class="listing-kicker">Administrative control</span>
+                <h1 class="watches-title mb-1">Admin Dashboard</h1>
+                <p class="text-muted mb-0">Marketplace oversight across users, listings, orders, and revenue.</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a class="btn btn-timeless-primary" th:href="@{/admin/users}">Manage Users</a>
+                <a class="btn btn-timeless-outline" th:href="@{/admin/listings}">Manage Listings</a>
+                <a class="btn btn-timeless-outline" th:href="@{/admin/orders}">Manage Orders</a>
+            </div>
         </div>
-        <div class="d-flex gap-2 flex-wrap">
-            <a class="btn btn-timeless-primary" th:href="@{/admin/users}">Manage Users</a>
-            <a class="btn btn-timeless-outline" th:href="@{/admin/listings}">Manage Listings</a>
-            <a class="btn btn-timeless-outline" th:href="@{/admin/orders}">Manage Orders</a>
-        </div>
-    </div>
+    </section>
 
     <div class="row g-3 mb-4">
-        <div class="col-md-6 col-xl-2"><div class="stat-card h-100"><small class="text-muted">Total Users</small><h3 th:text="${stats.totalUsers}">0</h3></div></div>
-        <div class="col-md-6 col-xl-2"><div class="stat-card h-100"><small class="text-muted">Total Listings</small><h3 th:text="${stats.totalListings}">0</h3></div></div>
-        <div class="col-md-6 col-xl-2"><div class="stat-card h-100"><small class="text-muted">Pending Review</small><h3 th:text="${stats.pendingReview}">0</h3></div></div>
-        <div class="col-md-6 col-xl-2"><div class="stat-card h-100"><small class="text-muted">Total Orders</small><h3 th:text="${stats.totalOrders}">0</h3></div></div>
-        <div class="col-md-12 col-xl-4"><div class="stat-card h-100"><small class="text-muted">Total Revenue</small><h3 th:text="${'৳' + #numbers.formatDecimal(stats.totalRevenue, 1, 'COMMA', 2, 'POINT')}">$0.00</h3></div></div>
+        <div class="col-md-6 col-xl-2">
+            <div class="stat-card h-100">
+                <p class="editorial-kicker mb-2">Accounts</p>
+                <small class="text-muted">Total Users</small>
+                <h3 th:text="${stats.totalUsers}">0</h3>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-2">
+            <div class="stat-card h-100">
+                <p class="editorial-kicker mb-2">Inventory</p>
+                <small class="text-muted">Total Listings</small>
+                <h3 th:text="${stats.totalListings}">0</h3>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-2">
+            <div class="stat-card h-100">
+                <p class="editorial-kicker mb-2">Review</p>
+                <small class="text-muted">Pending Review</small>
+                <h3 th:text="${stats.pendingReview}">0</h3>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-2">
+            <div class="stat-card h-100">
+                <p class="editorial-kicker mb-2">Orders</p>
+                <small class="text-muted">Total Orders</small>
+                <h3 th:text="${stats.totalOrders}">0</h3>
+            </div>
+        </div>
+        <div class="col-md-12 col-xl-4">
+            <div class="stat-card h-100">
+                <p class="editorial-kicker mb-2">Performance</p>
+                <small class="text-muted">Total Revenue</small>
+                <h3 th:text="${'৳' + #numbers.formatDecimal(stats.totalRevenue, 1, 'COMMA', 2, 'POINT')}">$0.00</h3>
+            </div>
+        </div>
     </div>
 
     <div class="timeless-panel p-4">
-        <h4 class="fw-bold mb-3">Recent Orders</h4>
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+                <p class="editorial-kicker mb-1">Operations feed</p>
+                <h4 class="fw-bold mb-0">Recent Orders</h4>
+            </div>
+            <span class="badge-status ACTIVE">Live View</span>
+        </div>
         <div class="table-responsive">
             <table class="table-timeless">
                 <thead>

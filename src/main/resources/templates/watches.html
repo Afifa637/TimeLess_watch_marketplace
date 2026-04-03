@@ -5,20 +5,25 @@
 <div th:replace="~{layout/base :: navbar}"></div>
 
 <main class="container py-5 main-content">
-    <div class="watches-headline d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <span class="listing-kicker">Curated drops</span>
-            <h1 class="watches-title mb-1">Browse Watches</h1>
-            <p class="listing-count mb-0" th:text="${watchPage.totalElements + ' active listings available'}">0 active listings available</p>
+    <section class="page-hero compact mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 watches-headline">
+            <div>
+                <span class="listing-kicker">Curated drops</span>
+                <h1 class="watches-title mb-1">Browse Watches</h1>
+                <p class="listing-count mb-0" th:text="${watchPage.totalElements + ' active listings available'}">0 active listings available</p>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <div class="row g-4">
+    <div class="row g-4 align-items-start">
         <div class="col-lg-3">
             <form method="get" th:action="@{/watches}" class="filter-sidebar">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="fw-bold mb-0">Filters</h4>
-                    <a class="small text-decoration-none" th:href="@{/watches}">Clear Filters</a>
+                    <div>
+                        <p class="editorial-kicker mb-1">Refine selection</p>
+                        <h4 class="fw-bold mb-0">Filters</h4>
+                    </div>
+                    <a class="small text-decoration-none" th:href="@{/watches}">Clear</a>
                 </div>
 
                 <div class="filter-group">
@@ -76,10 +81,7 @@
                                    th:value="${maxPrice != null ? maxPrice : (priceCeiling != null ? priceCeiling : 10000000)}">
                         </div>
                     </div>
-                    <small class="text-muted d-block mt-2"
-                           th:text="${'Available range: ৳' + #numbers.formatDecimal(priceFloor, 1, 'COMMA', 2, 'POINT') + ' - ৳' + #numbers.formatDecimal(priceCeiling, 1, 'COMMA', 2, 'POINT')}">
-                        Available range
-                    </small>
+
                 </div>
 
                 <div class="filter-group">
@@ -110,8 +112,8 @@
                     <div class="p-4">
                         <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
                             <div>
+                                <p class="editorial-kicker mb-2" th:text="${watch.brand}">Rolex</p>
                                 <h5 class="fw-bold mb-1" th:text="${watch.name}">Watch</h5>
-                                <p class="text-muted mb-0" th:text="${watch.brand}">Rolex</p>
                             </div>
                             <span class="badge-condition" th:text="${watch.condition}">GOOD</span>
                         </div>
