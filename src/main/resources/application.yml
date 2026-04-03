@@ -30,7 +30,7 @@ app:
     secret: ${JWT_SECRET}
     expiration-ms: ${JWT_EXPIRY}
   bootstrap:
-    enabled: ${BOOTSTRAP_ENABLED}
+    enabled: ${BOOTSTRAP_ENABLED:${APP_BOOTSTRAP_ENABLED:true}}
   admin:
     email: ${APP_ADMIN_EMAIL}
     password: ${APP_ADMIN_PASSWORD}
