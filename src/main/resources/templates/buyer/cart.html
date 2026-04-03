@@ -5,14 +5,17 @@
 <div th:replace="~{layout/base :: navbar}"></div>
 
 <main class="container py-5 main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <h1 class="fw-bold mb-1">My Cart</h1>
-            <p class="text-muted mb-0">Review your selected watches before checkout.</p>
+    <section class="page-hero compact mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-0 flex-wrap gap-3">
+            <div>
+                <span class="listing-kicker">Private selection</span>
+                <h1 class="watches-title mb-1">My Cart</h1>
+                <p class="text-muted mb-0">Review your selected watches before checkout.</p>
+            </div>
+            <a class="btn btn-timeless-primary" th:href="@{/buyer/payment}"
+               th:if="${!cartItems.isEmpty()}">Proceed to Payment →</a>
         </div>
-        <a class="btn btn-timeless-primary" th:href="@{/buyer/payment}"
-           th:if="${!cartItems.isEmpty()}">Proceed to Payment →</a>
-    </div>
+    </section>
 
     <div th:if="${cartItems.isEmpty()}" class="empty-state">
         <h4 class="fw-bold">Your cart is empty</h4>
@@ -21,6 +24,14 @@
     </div>
 
     <div th:if="${!cartItems.isEmpty()}" class="timeless-panel p-3 p-lg-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+                <p class="editorial-kicker mb-1">Checkout desk</p>
+                <h4 class="fw-bold mb-0">Selected Pieces</h4>
+            </div>
+            <span class="badge-status ACTIVE">Ready</span>
+        </div>
+
         <div class="table-responsive">
             <table class="table-timeless">
                 <thead>
@@ -47,7 +58,6 @@
                     </td>
                     <td th:text="${'৳' + #numbers.formatDecimal(item.price, 1, 'COMMA', 2, 'POINT')}">৳1,000</td>
                     <td>
-                        <!-- Quantity stepper -->
                         <div class="qty-stepper">
                             <button class="qty-btn" th:onclick="|cartQty(${item.watchId}, -1)|"
                                     title="Decrease">−</button>
@@ -67,9 +77,9 @@
             </table>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center pt-3 flex-wrap gap-3">
+        <div class="d-flex justify-content-between align-items-center pt-4 flex-wrap gap-3">
             <button class="btn btn-timeless-outline btn-sm" onclick="clearCartFull()">Clear Cart</button>
-            <div class="timeless-panel px-4 py-3 d-flex gap-4 align-items-center">
+            <div class="timeless-panel px-4 py-3 d-flex gap-4 align-items-center flex-wrap">
                 <div>
                     <div class="text-muted small">Total</div>
                     <div class="price-text" id="cartGrandTotal"

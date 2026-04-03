@@ -5,17 +5,21 @@
 <div th:replace="~{layout/base :: navbar}"></div>
 
 <main class="container py-5 main-content page-narrow">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <h1 class="fw-bold mb-1">Secure Checkout</h1>
-            <p class="text-muted mb-0">Complete your purchase with a classic, trusted payment flow.</p>
+    <section class="page-hero compact mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-0 flex-wrap gap-3">
+            <div>
+                <span class="listing-kicker">Secure checkout</span>
+                <h1 class="watches-title mb-1">Secure Checkout</h1>
+                <p class="text-muted mb-0">Complete your purchase with a classic, trusted payment flow.</p>
+            </div>
+            <a class="btn btn-timeless-outline" th:href="@{/buyer/cart}">Back to Cart</a>
         </div>
-        <a class="btn btn-timeless-outline" th:href="@{/buyer/cart}">Back to Cart</a>
-    </div>
+    </section>
 
     <div class="row g-4">
         <div class="col-lg-7">
             <div class="timeless-panel p-4 p-lg-5">
+                <p class="editorial-kicker mb-2">Payment desk</p>
                 <h4 class="fw-bold mb-3">Payment Method</h4>
                 <p class="text-muted">All payments are simulated for this prototype experience.</p>
                 <form id="paymentForm" class="mt-4">
@@ -42,7 +46,10 @@
         <div class="col-lg-5">
             <div class="timeless-panel p-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="fw-bold mb-0">Order Summary</h4>
+                    <div>
+                        <p class="editorial-kicker mb-1">Summary</p>
+                        <h4 class="fw-bold mb-0">Order Overview</h4>
+                    </div>
                     <span class="badge-status ACTIVE">Ready</span>
                 </div>
                 <div class="d-flex flex-column gap-3">

@@ -5,22 +5,58 @@
 <div th:replace="~{layout/base :: navbar}"></div>
 
 <main class="container py-5 main-content">
+    <section class="page-hero compact mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 watches-headline text-lg-start">
+            <div>
+                <span class="listing-kicker">Seller atelier</span>
+                <h1 class="watches-title mb-1">List a New Watch</h1>
+                <p class="listing-count mb-0">Prepare a refined listing for collector review.</p>
+            </div>
+            <a class="btn btn-timeless-outline" th:href="@{/seller/dashboard}">Back to Dashboard</a>
+        </div>
+    </section>
+
     <div class="row justify-content-center">
-        <div class="col-xl-9">
+        <div class="col-xl-10">
             <div class="timeless-panel p-4 p-lg-5">
-                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                    <div>
-                        <h1 class="fw-bold mb-1">List a New Watch</h1>
-                        <p class="text-muted mb-0">Complete the form below. Your listing will be submitted for admin review.</p>
+                <div class="row g-4 align-items-start mb-4">
+                    <div class="col-lg-4">
+                        <div class="stat-card h-100">
+                            <p class="editorial-kicker mb-2">Presentation</p>
+                            <h5 class="fw-bold">Luxury-first listing flow</h5>
+                            <p class="text-muted mb-0">Present the watch with complete details, clean references, and premium imagery for a stronger marketplace presence.</p>
+                        </div>
                     </div>
-                    <a class="btn btn-timeless-outline" th:href="@{/seller/dashboard}">Back to Dashboard</a>
+                    <div class="col-lg-4">
+                        <div class="stat-card h-100">
+                            <p class="editorial-kicker mb-2">Review</p>
+                            <h5 class="fw-bold">Submitted for approval</h5>
+                            <p class="text-muted mb-0">Your listing keeps the same approval process, now framed with a more editorial and boutique-inspired seller experience.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="stat-card h-100">
+                            <p class="editorial-kicker mb-2">Detail</p>
+                            <h5 class="fw-bold">Collector-grade information</h5>
+                            <p class="text-muted mb-0">Reference number, year, accessories, and condition notes help buyers evaluate with confidence.</p>
+                        </div>
+                    </div>
                 </div>
 
                 <form id="createWatchForm" class="needs-validation" novalidate enctype="multipart/form-data">
-                    <div class="row g-3">
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                <div>
+                                    <p class="editorial-kicker mb-1">Watch profile</p>
+                                    <h4 class="fw-bold mb-0">Core Details</h4>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="col-md-6">
                             <label class="form-label">Name</label>
-                            <input type="text" name="name" class="form-control" required>
+                            <input type="text" name="name" class="form-control" required placeholder="e.g. Submariner Date">
                         </div>
 
                         <div class="col-md-6">
@@ -49,7 +85,7 @@
 
                         <div class="col-md-4">
                             <label class="form-label">Price</label>
-                            <input type="number" min="1" step="0.01" name="price" class="form-control" required>
+                            <input type="number" min="1" step="0.01" name="price" class="form-control" required placeholder="Enter asking price">
                         </div>
 
                         <div class="col-md-4">
@@ -59,12 +95,21 @@
 
                         <div class="col-md-4">
                             <label class="form-label">Year</label>
-                            <input type="number" min="1900" step="1" name="year" class="form-control">
+                            <input type="number" min="1900" step="1" name="year" class="form-control" placeholder="Production year">
                         </div>
 
                         <div class="col-md-4">
                             <label class="form-label">Reference Number</label>
-                            <input type="text" name="referenceNumber" class="form-control">
+                            <input type="text" name="referenceNumber" class="form-control" placeholder="Model / reference">
+                        </div>
+
+                        <div class="col-12 mt-2">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                <div>
+                                    <p class="editorial-kicker mb-1">Showcase</p>
+                                    <h4 class="fw-bold mb-0">Media & Narrative</h4>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="col-12">
@@ -79,7 +124,7 @@
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-end gap-2 mt-4">
+                    <div class="d-flex justify-content-end gap-2 mt-5 flex-wrap">
                         <a class="btn btn-timeless-outline" th:href="@{/seller/dashboard}">Cancel</a>
                         <button class="btn btn-timeless-primary" type="submit">Submit Listing</button>
                     </div>
