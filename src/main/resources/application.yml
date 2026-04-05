@@ -10,6 +10,7 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASS}
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -17,11 +18,14 @@ spring:
     properties:
       hibernate:
         format_sql: false
+
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
     enabled: true
+
   thymeleaf:
     cache: false
+
   servlet:
     multipart:
       max-file-size: 5MB
