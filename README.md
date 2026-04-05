@@ -4,31 +4,6 @@
 
 ---
 
-## 📋 Table of Contents
-
-1. [Project Overview](#-project-overview)
-2. [Live Demo](#-live-demo)
-3. [Demo Credentials](#-demo-credentials)
-4. [Tech Stack](#-tech-stack)
-5. [Prerequisites](#-prerequisites)
-6. [Quick Start (Docker)](#-quick-start-docker)
-7. [Environment Variables](#-environment-variables)
-8. [Architecture Overview](#-architecture-overview)
-9. [ER Diagram](#-er-diagram)
-10. [Project Structure](#-project-structure)
-11. [API Reference](#-api-reference)
-12. [Authentication Flow](#-authentication-flow)
-13. [Role-Based Access](#-role-based-access)
-14. [Running Tests](#-running-tests)
-15. [CI/CD Pipeline](#-cicd-pipeline)
-16. [Branch Strategy](#-branch-strategy)
-17. [Render Deployment](#-render-deployment)
-18. [Seed Data](#-seed-data)
-19. [Security Notes](#-security-notes)
-20. [Troubleshooting](#-troubleshooting)
-
----
-
 ## 📌 Project Overview
 
 **Timeless Marketplace** is a luxury watch resale platform where:
@@ -105,7 +80,7 @@ This is the fastest way to get the entire application running locally.
 ### Step 1 — Clone the repository
 
 ```bash
-git clone [https://github.com/your-username/timeless-marketplace.git](https://github.com/Afifa637/TimeLess_watch_marketplace)
+git clone [https://github.com/Afifa637/TimeLess_watch_marketplace.git](https://github.com/Afifa637/TimeLess_watch_marketplace.git) 
 cd timeless-marketplace
 ```
 
@@ -117,7 +92,7 @@ Copy the example environment file and fill in your values:
 cp .env.example .env
 ```
 
-Open `.env` in any text editor and set the values (see [Environment Variables](#-environment-variables) below). The defaults in the example file work out of the box for local Docker use.
+Open `.env.example` in any text editor and set the values.
 
 ### Step 3 — Build and start everything
 
@@ -226,6 +201,7 @@ docker compose down -v
 │           user_watch_cart, user_watch_wishlist                 │
 └────────────────────────────────────────────────────────────────┘
 ```
+<img width="3079" height="2569" alt="final_arch" src="https://github.com/user-attachments/assets/3df1ef14-039b-4286-9a59-a86c5bb8a83a" />
 
 **Key design decisions:**
 - **Stateless auth** — JWT eliminates the need for server-side sessions.
@@ -237,68 +213,7 @@ docker compose down -v
 
 ## 📊 ER Diagram
 
-```
-┌──────────────────┐         ┌──────────────────┐
-│     users        │ 1     ∞ │     watches       │
-│──────────────────│─────────│──────────────────│
-│ id          PK   │         │ id          PK   │
-│ email       UNIQUE         │ seller_id   FK → users
-│ password_hash    │         │ name             │
-│ full_name        │         │ brand            │
-│ phone            │         │ category         │
-│ address          │         │ condition        │
-│ role             │         │ description      │
-│ enabled          │         │ price            │
-│ email_verified   │         │ stock_quantity   │
-│ created_at       │         │ status           │
-└────────┬─────────┘         │ image_url        │
-         │                   │ reference_number │
-         │                   │ year             │
-         │                   │ created_at       │
-         │                   └────────┬─────────┘
-         │                            │
-         │ 1                          │ 1
-         │           ┌────────────────┘
-         ▼ ∞         ▼ ∞
-┌──────────────────┐       ┌──────────────────────┐
-│     orders       │ 1   1 │      payments         │
-│──────────────────│───────│──────────────────────│
-│ id          PK   │       │ id            PK     │
-│ buyer_id    FK   │       │ order_id      FK UNIQUE
-│ watch_id    FK   │       │ buyer_id      FK     │
-│ status           │       │ amount               │
-│ total_amount     │       │ method               │
-│ tracking_number  │       │ status               │
-│ created_at       │       │ transaction_ref      │
-│ updated_at       │       │ paid_at              │
-└────────┬─────────┘       │ created_at           │
-         │ 1               └──────────────────────┘
-         │
-         ▼ 1
-┌──────────────────┐
-│     reviews      │
-│──────────────────│
-│ id          PK   │
-│ buyer_id    FK   │
-│ watch_id    FK   │
-│ order_id    FK UNIQUE
-│ rating           │
-│ comment          │
-│ created_at       │
-│ UNIQUE(buyer_id, watch_id)
-└──────────────────┘
-
-┌──────────────────────┐     ┌──────────────────────┐
-│  user_watch_wishlist │     │   user_watch_cart     │
-│──────────────────────│     │──────────────────────│
-│ user_id   PK/FK      │     │ id        PK         │
-│ watch_id  PK/FK      │     │ user_id   FK         │
-│ added_at             │     │ watch_id  FK         │
-└──────────────────────┘     │ quantity             │
-                             │ added_at             │
-                             │ UNIQUE(user_id, watch_id)
-                             └──────────────────────┘
-```
+<img width="2800" height="1786" alt="ER_Diagram_Corrected" src="https://github.com/user-attachments/assets/82b96e3d-da5e-4cdb-a78a-2189c7d7d507" />
 
 **Relationships summary:**
 - `users` → `watches`: One seller can list many watches (1:M)
@@ -583,30 +498,6 @@ mvn verify
 
 **Integration tests** use `@SpringBootTest` + `MockMvc` + an in-memory **H2** database (configured via `application-test.yml`). Liquibase is disabled in test mode; Hibernate's `create-drop` strategy builds the schema from JPA annotations.
 
-### Test environment configuration
-
-Tests use `src/test/resources/application-test.yml`:
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:h2:mem:testdb;MODE=PostgreSQL
-    driver-class-name: org.h2.Driver
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-  liquibase:
-    enabled: false
-app:
-  jwt:
-    secret: test-secret-key-for-unit-testing-only-must-be-32-chars
-    expiration-ms: 3600000
-  bootstrap:
-    enabled: false
-```
-
----
-
 ## ⚙️ CI/CD Pipeline
 
 The pipeline is defined in `.github/workflows/ci-cd.yml` and runs automatically on every push or pull request.
@@ -682,7 +573,6 @@ main           ← production-ready, protected
         ├── feature/add-watch-listing
         ├── feature/payment-flow
         ├── feature/buyer-dashboard
-        └── hotfix/fix-jwt-expiry   ← cut from main for urgent fixes
 ```
 
 ### Rules
@@ -717,7 +607,6 @@ git push origin feature/add-review-moderation
 # 6. When develop is stable, open PR: develop → main
 # 7. After merge to main, CI auto-deploys to Render
 ```
-
 ---
 
 ## ☁️ Render Deployment
